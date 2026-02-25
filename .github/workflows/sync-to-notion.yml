@@ -37,5 +37,5 @@ jobs:
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: 31155e5e-0a9e-8142-8361-c394d107afe3
-          NOTION_CONSULTATION_DATABASE_ID: ${{ secrets.NOTION_CONSULTATION_DATABASE_ID }}
+          NOTION_CONSULTATION_DATABASE_ID: 31255e5e-0a9e-81ef-933d-c8cc76a3e352
           DATA_PATH: '../gh-pages/data/submissions'
