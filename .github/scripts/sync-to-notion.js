@@ -14,53 +14,6 @@ const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
 const NOTION_CONSULTATION_DATABASE_ID = process.env.NOTION_CONSULTATION_DATABASE_ID;
 const DATA_DIR = process.env.DATA_PATH || '../gh-pages/data/submissions';
 
-// 查询 Notion 数据库检查记录是否已存在
-async function findExistingRecord(databaseId, submissionId) {
-  return new Promise((resolve, reject) => {
-    const data = JSON.stringify({
-      filter: {
-        property: '提交ID',
-        rich_text: {
-          equals: submissionId
-        }
-      }
-    });
-
-    const options = {
-      hostname: 'api.notion.com',
-      port: 443,
-      path: `/v1/databases/${databaseId}/query`,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${NOTION_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let responseData = '';
-      
-      res.on('data', (chunk) => {
-        responseData += chunk;
-      });
-      
-      res.on('end', () => {
-        try {
-          const result = JSON.parse(responseData);
-          resolve(result.results && result.results.length > 0);
-        } catch (e) {
-          resolve(false);
-        }
-      });
-    });
-
-    req.on('error', () => resolve(false));
-    req.write(data);
-    req.end();
-  });
-}
-
 // 读取所有提交文件
 function getSubmissions() {
   const submissions = [];
@@ -141,14 +94,72 @@ function getDataType(submission) {
   return '完整问卷';
 }
 
+// 查询 Notion 数据库检查记录是否已存在
+async function findExistingRecord(databaseId, submissionId) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({
+      filter: {
+        property: '提交ID',
+        rich_text: {
+          equals: submissionId
+        }
+      }
+    });
+
+    const options = {
+      hostname: 'api.notion.com',
+      port: 443,
+      path: `/v1/databases/${databaseId}/query`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${NOTION_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let responseData = '';
+      
+      res.on('data', (chunk) => {
+        responseData += chunk;
+      });
+      
+      res.on('end', () => {
+        try {
+          const data = JSON.parse(responseData);
+          if (res.statusCode === 200) {
+            resolve(data.results.length > 0 ? data.results[0] : null);
+          } else {
+            console.error('查询现有记录失败:', data);
+            resolve(null);
+          }
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      console.error('查询请求错误:', error.message);
+      resolve(null);
+    });
+
+    req.write(data);
+    req.end();
+  });
+}
+
 // 提交到 Notion
-async function submitToNotion(submission, databaseId, dataType) {
+async function submitToNotion(databaseId, submission) {
   return new Promise((resolve, reject) => {
     const companyName = getCompanyName(submission);
     const contact = getContactInfo(submission);
     const assessment = getAssessment(submission);
+    const dataType = getDataType(submission);
     const consultation = submission.consultation || {};
     
+    // 构建基础属性
     const properties = {
       '提交ID': {
         rich_text: [{ text: { content: submission.id || '' } }]
@@ -188,7 +199,7 @@ async function submitToNotion(submission, databaseId, dataType) {
       }
     };
     
-    // 预约咨询特有字段
+    // 如果是预约咨询，添加额外字段
     if (dataType === '预约咨询') {
       properties['期望咨询时间'] = {
         date: { start: consultation.preferredTime || submission.timestamp || new Date().toISOString() }
@@ -227,10 +238,9 @@ async function submitToNotion(submission, databaseId, dataType) {
       
       res.on('end', () => {
         if (res.statusCode === 200) {
-          console.log(`✅ ${dataType}同步成功: ${companyName}`);
           resolve(JSON.parse(responseData));
         } else {
-          console.error(`❌ ${dataType}同步失败: ${companyName}`, responseData);
+          console.error(`同步失败: ${companyName}`, responseData);
           reject(new Error(`HTTP ${res.statusCode}`));
         }
       });
@@ -261,27 +271,34 @@ async function main() {
     process.exit(1);
   }
 
-  // 硬编码咨询数据库ID（避免secrets传递问题）
-  const CONSULTATION_DB_ID = NOTION_CONSULTATION_DATABASE_ID || '31255e5e-0a9e-81ef-933d-c8cc76a3e352';
+  console.log(`完整问卷数据库: ${NOTION_DATABASE_ID}`);
+  console.log(`预约咨询数据库: ${NOTION_CONSULTATION_DATABASE_ID || '未配置'}`);
   
   const submissions = getSubmissions();
   console.log(`找到 ${submissions.length} 条提交记录`);
   
   let fullSurveySuccess = 0;
   let fullSurveySkip = 0;
+  let fullSurveyFail = 0;
   let consultationSuccess = 0;
   let consultationSkip = 0;
-  let failCount = 0;
+  let consultationFail = 0;
   
   for (const submission of submissions) {
     const dataType = getDataType(submission);
-    const databaseId = dataType === '预约咨询' ? CONSULTATION_DB_ID : NOTION_DATABASE_ID;
+    const companyName = getCompanyName(submission);
+    
+    // 根据数据类型选择目标数据库
+    const targetDatabaseId = (dataType === '预约咨询' && NOTION_CONSULTATION_DATABASE_ID) 
+      ? NOTION_CONSULTATION_DATABASE_ID 
+      : NOTION_DATABASE_ID;
     
     try {
-      // 检查是否已同步
-      const exists = await findExistingRecord(databaseId, submission.id);
-      if (exists) {
-        console.log(`⏭️ 已存在，跳过: ${getCompanyName(submission)}`);
+      // 检查是否已存在
+      const existing = await findExistingRecord(targetDatabaseId, submission.id);
+      
+      if (existing) {
+        console.log(`⚠️ 已存在，跳过: ${companyName} (${dataType})`);
         if (dataType === '预约咨询') {
           consultationSkip++;
         } else {
@@ -290,8 +307,9 @@ async function main() {
         continue;
       }
       
-      // 同步到 Notion
-      await submitToNotion(submission, databaseId, dataType);
+      // 提交到 Notion
+      await submitToNotion(targetDatabaseId, submission);
+      console.log(`✅ 同步成功: ${companyName} (${dataType})`);
       
       if (dataType === '预约咨询') {
         consultationSuccess++;
@@ -299,16 +317,21 @@ async function main() {
         fullSurveySuccess++;
       }
     } catch (error) {
-      console.error(`❌ 同步失败: ${getCompanyName(submission)}`, error.message);
-      failCount++;
+      console.error(`❌ 同步失败: ${companyName}`, error.message);
+      if (dataType === '预约咨询') {
+        consultationFail++;
+      } else {
+        fullSurveyFail++;
+      }
     }
   }
   
   console.log(`\n同步完成:`);
-  console.log(`  完整问卷: ${fullSurveySuccess} 成功, ${fullSurveySkip} 跳过, ${failCount} 失败`);
-  console.log(`  预约咨询: ${consultationSuccess} 成功, ${consultationSkip} 跳过, ${failCount} 失败`);
+  console.log(`  完整问卷: ${fullSurveySuccess} 成功, ${fullSurveySkip} 跳过, ${fullSurveyFail} 失败`);
+  console.log(`  预约咨询: ${consultationSuccess} 成功, ${consultationSkip} 跳过, ${consultationFail} 失败`);
   
-  process.exit(failCount > 0 ? 1 : 0);
+  const totalFail = fullSurveyFail + consultationFail;
+  process.exit(totalFail > 0 ? 1 : 0);
 }
 
 main().catch(error => {
