@@ -1,5 +1,5 @@
 // GitHub → Notion 同步脚本
-// 当有新提交时，自动同步到 Notion 数据库
+// 支持双数据库：完整问卷数据库 + 预约咨询数据库
 
 import https from 'https';
 import fs from 'fs';
@@ -13,6 +13,53 @@ const NOTION_API_KEY = process.env.NOTION_API_KEY;
 const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
 const NOTION_CONSULTATION_DATABASE_ID = process.env.NOTION_CONSULTATION_DATABASE_ID;
 const DATA_DIR = process.env.DATA_PATH || '../gh-pages/data/submissions';
+
+// 查询 Notion 数据库检查记录是否已存在
+async function findExistingRecord(databaseId, submissionId) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({
+      filter: {
+        property: '提交ID',
+        rich_text: {
+          equals: submissionId
+        }
+      }
+    });
+
+    const options = {
+      hostname: 'api.notion.com',
+      port: 443,
+      path: `/v1/databases/${databaseId}/query`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${NOTION_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let responseData = '';
+      
+      res.on('data', (chunk) => {
+        responseData += chunk;
+      });
+      
+      res.on('end', () => {
+        try {
+          const result = JSON.parse(responseData);
+          resolve(result.results && result.results.length > 0);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    });
+
+    req.on('error', () => resolve(false));
+    req.write(data);
+    req.end();
+  });
+}
 
 // 读取所有提交文件
 function getSubmissions() {
@@ -40,11 +87,9 @@ function getSubmissions() {
 
 // 提取企业名称（兼容新旧数据格式）
 function getCompanyName(submission) {
-  // 新格式: submission.profile.companyName
   if (submission.profile && submission.profile.companyName) {
     return submission.profile.companyName;
   }
-  // 旧格式: submission.companyName
   if (submission.companyName) {
     return submission.companyName;
   }
@@ -53,7 +98,6 @@ function getCompanyName(submission) {
 
 // 提取联系人信息（兼容新旧数据格式）
 function getContactInfo(submission) {
-  // 新格式
   if (submission.profile) {
     return {
       name: submission.profile.contactName || '',
@@ -62,7 +106,6 @@ function getContactInfo(submission) {
       industry: submission.profile.industry || ''
     };
   }
-  // 旧格式
   return {
     name: submission.contactName || '',
     phone: submission.contactPhone || '',
@@ -73,7 +116,6 @@ function getContactInfo(submission) {
 
 // 提取评估结果（兼容新旧数据格式）
 function getAssessment(submission) {
-  // 新格式: submission.assessment
   if (submission.assessment) {
     return {
       score: submission.assessment.score || 0,
@@ -81,7 +123,6 @@ function getAssessment(submission) {
       level: submission.assessment.level || ''
     };
   }
-  // 旧格式
   return {
     score: submission.totalScore || submission.score || 0,
     stage: submission.stage || '',
@@ -91,176 +132,78 @@ function getAssessment(submission) {
 
 // 获取数据类型
 function getDataType(submission) {
-  // 新格式有 dataType 字段
   if (submission.dataType) {
     return submission.dataType;
   }
-  // 旧格式或没有 dataType 的，根据是否有 consultation 字段判断
-  if (submission.consultation) {
+  if (submission.consultation && submission.consultation.topic) {
     return '预约咨询';
   }
-  // 默认是完整问卷
   return '完整问卷';
 }
 
-// 提交到 Notion - 完整问卷数据库
-async function submitToFullSurveyDatabase(submission) {
+// 提交到 Notion
+async function submitToNotion(submission, databaseId, dataType) {
   return new Promise((resolve, reject) => {
     const companyName = getCompanyName(submission);
     const contact = getContactInfo(submission);
     const assessment = getAssessment(submission);
-    const dataType = getDataType(submission);
-    
-    const data = JSON.stringify({
-      parent: { database_id: NOTION_DATABASE_ID },
-      properties: {
-        '企业名称': {
-          title: [{ text: { content: companyName } }]
-        },
-        '联系人': {
-          rich_text: [{ text: { content: contact.name } }]
-        },
-        '联系电话': {
-          rich_text: [{ text: { content: contact.phone } }]
-        },
-        '联系邮箱': {
-          rich_text: [{ text: { content: contact.email } }]
-        },
-        '所属行业': {
-          rich_text: [{ text: { content: contact.industry } }]
-        },
-        '评估得分': {
-          number: assessment.score
-        },
-        '出海阶段': {
-          select: { name: assessment.stage || '未分类' }
-        },
-        '企业等级': {
-          select: { name: assessment.level || '未分类' }
-        },
-        '提交时间': {
-          date: { start: submission.timestamp || new Date().toISOString() }
-        },
-        '跟进状态': {
-          select: { name: '待跟进' }
-        },
-        '数据类型': {
-          select: { name: dataType }
-        }
-      }
-    });
-
-    const options = {
-      hostname: 'api.notion.com',
-      port: 443,
-      path: '/v1/pages',
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${NOTION_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let responseData = '';
-      
-      res.on('data', (chunk) => {
-        responseData += chunk;
-      });
-      
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          console.log(`✅ 完整问卷同步成功: ${companyName}`);
-          resolve(JSON.parse(responseData));
-        } else {
-          console.error(`❌ 完整问卷同步失败: ${companyName}`, responseData);
-          reject(new Error(`HTTP ${res.statusCode}`));
-        }
-      });
-    });
-
-    req.on('error', (error) => {
-      console.error(`请求错误:`, error.message);
-      reject(error);
-    });
-
-    req.write(data);
-    req.end();
-  });
-}
-
-// 提交到 Notion - 预约咨询数据库
-async function submitToConsultationDatabase(submission) {
-  // 检查数据库 ID 是否有效
-  console.log(`DEBUG: NOTION_CONSULTATION_DATABASE_ID = "${NOTION_CONSULTATION_DATABASE_ID}"`);
-  console.log(`DEBUG: Length = ${NOTION_CONSULTATION_DATABASE_ID ? NOTION_CONSULTATION_DATABASE_ID.length : 0}`);
-  
-  if (!NOTION_CONSULTATION_DATABASE_ID) {
-    console.error('❌ NOTION_CONSULTATION_DATABASE_ID 未定义');
-    console.error('   请检查 GitHub Secrets 中是否正确设置了该变量');
-    return Promise.reject(new Error('NOTION_CONSULTATION_DATABASE_ID not defined'));
-  }
-  
-  if (NOTION_CONSULTATION_DATABASE_ID.length < 30) {
-    console.error(`❌ NOTION_CONSULTATION_DATABASE_ID 格式无效: "${NOTION_CONSULTATION_DATABASE_ID}"`);
-    console.error(`   长度: ${NOTION_CONSULTATION_DATABASE_ID.length}，期望: 36`);
-    return Promise.reject(new Error('NOTION_CONSULTATION_DATABASE_ID invalid format'));
-  }
-  
-  return new Promise((resolve, reject) => {
-    const companyName = getCompanyName(submission);
-    const contact = getContactInfo(submission);
-    const assessment = getAssessment(submission);
-    const dataType = getDataType(submission);
     const consultation = submission.consultation || {};
     
-    const data = JSON.stringify({
-      parent: { database_id: NOTION_CONSULTATION_DATABASE_ID },
-      properties: {
-        '企业名称': {
-          title: [{ text: { content: companyName } }]
-        },
-        '联系人': {
-          rich_text: [{ text: { content: contact.name } }]
-        },
-        '联系电话': {
-          rich_text: [{ text: { content: contact.phone } }]
-        },
-        '联系邮箱': {
-          rich_text: [{ text: { content: contact.email } }]
-        },
-        '所属行业': {
-          rich_text: [{ text: { content: contact.industry } }]
-        },
-        '评估得分': {
-          number: assessment.score
-        },
-        '出海阶段': {
-          select: { name: assessment.stage || '未分类' }
-        },
-        '企业等级': {
-          select: { name: assessment.level || '未分类' }
-        },
-        '提交时间': {
-          date: { start: submission.timestamp || new Date().toISOString() }
-        },
-        '跟进状态': {
-          select: { name: '待跟进' }
-        },
-        '数据类型': {
-          select: { name: dataType }
-        },
-        '期望咨询时间': {
-          date: { start: consultation.preferredTime || submission.timestamp || new Date().toISOString() }
-        },
-        '咨询主题': {
-          select: { name: consultation.topic || '其他' }
-        },
-        '具体需求描述': {
-          rich_text: [{ text: { content: consultation.description || '' } }]
-        }
+    const properties = {
+      '提交ID': {
+        rich_text: [{ text: { content: submission.id || '' } }]
+      },
+      '企业名称': {
+        title: [{ text: { content: companyName } }]
+      },
+      '联系人': {
+        rich_text: [{ text: { content: contact.name } }]
+      },
+      '联系电话': {
+        rich_text: [{ text: { content: contact.phone } }]
+      },
+      '联系邮箱': {
+        rich_text: [{ text: { content: contact.email } }]
+      },
+      '所属行业': {
+        rich_text: [{ text: { content: contact.industry } }]
+      },
+      '评估得分': {
+        number: assessment.score
+      },
+      '出海阶段': {
+        select: { name: assessment.stage || '未分类' }
+      },
+      '企业等级': {
+        select: { name: assessment.level || '未分类' }
+      },
+      '提交时间': {
+        date: { start: submission.timestamp || new Date().toISOString() }
+      },
+      '跟进状态': {
+        select: { name: '待跟进' }
+      },
+      '数据类型': {
+        select: { name: dataType }
       }
+    };
+    
+    // 预约咨询特有字段
+    if (dataType === '预约咨询') {
+      properties['期望咨询时间'] = {
+        date: { start: consultation.preferredTime || submission.timestamp || new Date().toISOString() }
+      };
+      properties['咨询主题'] = {
+        select: { name: consultation.topic || '其他' }
+      };
+      properties['具体需求描述'] = {
+        rich_text: [{ text: { content: consultation.description || '' } }]
+      };
+    }
+    
+    const data = JSON.stringify({
+      parent: { database_id: databaseId },
+      properties: properties
     });
 
     const options = {
@@ -284,10 +227,10 @@ async function submitToConsultationDatabase(submission) {
       
       res.on('end', () => {
         if (res.statusCode === 200) {
-          console.log(`✅ 预约咨询同步成功: ${companyName}`);
+          console.log(`✅ ${dataType}同步成功: ${companyName}`);
           resolve(JSON.parse(responseData));
         } else {
-          console.error(`❌ 预约咨询同步失败: ${companyName}`, responseData);
+          console.error(`❌ ${dataType}同步失败: ${companyName}`, responseData);
           reject(new Error(`HTTP ${res.statusCode}`));
         }
       });
@@ -318,53 +261,54 @@ async function main() {
     process.exit(1);
   }
 
-  // 调试日志：检查环境变量
-  console.log('环境变量检查:');
-  console.log(`  NOTION_API_KEY: ${NOTION_API_KEY ? '已设置' : '未设置'}`);
-  console.log(`  NOTION_DATABASE_ID: ${NOTION_DATABASE_ID}`);
-  console.log(`  NOTION_CONSULTATION_DATABASE_ID: ${NOTION_CONSULTATION_DATABASE_ID || '未设置'}`);
-  
-  if (!NOTION_CONSULTATION_DATABASE_ID || NOTION_CONSULTATION_DATABASE_ID === '***' || NOTION_CONSULTATION_DATABASE_ID.length < 30) {
-    console.warn('警告: 未设置 NOTION_CONSULTATION_DATABASE_ID，预约咨询数据将不会同步');
-    console.warn('请检查 GitHub Secrets 中是否正确设置了 NOTION_CONSULTATION_DATABASE_ID');
-  }
+  // 硬编码咨询数据库ID（避免secrets传递问题）
+  const CONSULTATION_DB_ID = NOTION_CONSULTATION_DATABASE_ID || '31255e5e-0a9e-81ef-933d-c8cc76a3e352';
   
   const submissions = getSubmissions();
   console.log(`找到 ${submissions.length} 条提交记录`);
   
   let fullSurveySuccess = 0;
-  let fullSurveyFail = 0;
+  let fullSurveySkip = 0;
   let consultationSuccess = 0;
-  let consultationFail = 0;
+  let consultationSkip = 0;
+  let failCount = 0;
   
   for (const submission of submissions) {
     const dataType = getDataType(submission);
+    const databaseId = dataType === '预约咨询' ? CONSULTATION_DB_ID : NOTION_DATABASE_ID;
     
     try {
-      if (dataType === '预约咨询' && NOTION_CONSULTATION_DATABASE_ID) {
-        // 预约咨询数据 → 咨询预约记录数据库
-        await submitToConsultationDatabase(submission);
+      // 检查是否已同步
+      const exists = await findExistingRecord(databaseId, submission.id);
+      if (exists) {
+        console.log(`⏭️ 已存在，跳过: ${getCompanyName(submission)}`);
+        if (dataType === '预约咨询') {
+          consultationSkip++;
+        } else {
+          fullSurveySkip++;
+        }
+        continue;
+      }
+      
+      // 同步到 Notion
+      await submitToNotion(submission, databaseId, dataType);
+      
+      if (dataType === '预约咨询') {
         consultationSuccess++;
       } else {
-        // 完整问卷数据 → 出海测评咨询记录数据库
-        await submitToFullSurveyDatabase(submission);
         fullSurveySuccess++;
       }
     } catch (error) {
-      if (dataType === '预约咨询') {
-        consultationFail++;
-      } else {
-        fullSurveyFail++;
-      }
+      console.error(`❌ 同步失败: ${getCompanyName(submission)}`, error.message);
+      failCount++;
     }
   }
   
   console.log(`\n同步完成:`);
-  console.log(`  完整问卷: ${fullSurveySuccess} 成功, ${fullSurveyFail} 失败`);
-  console.log(`  预约咨询: ${consultationSuccess} 成功, ${consultationFail} 失败`);
+  console.log(`  完整问卷: ${fullSurveySuccess} 成功, ${fullSurveySkip} 跳过, ${failCount} 失败`);
+  console.log(`  预约咨询: ${consultationSuccess} 成功, ${consultationSkip} 跳过, ${failCount} 失败`);
   
-  const totalFail = fullSurveyFail + consultationFail;
-  process.exit(totalFail > 0 ? 1 : 0);
+  process.exit(failCount > 0 ? 1 : 0);
 }
 
 main().catch(error => {
