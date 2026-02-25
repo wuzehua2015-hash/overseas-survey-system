@@ -7,6 +7,7 @@ const DATA_PATH = 'data/submissions';
 export interface FullSubmissionData {
   id: string;
   timestamp: string;
+  dataType: '完整问卷' | '预约咨询';
   // 企业画像
   profile: {
     companyName: string;
@@ -36,6 +37,12 @@ export interface FullSubmissionData {
   };
   // 完整问卷数据（可选，用于深度分析）
   fullData?: Record<string, unknown>;
+  // 预约咨询专用字段
+  consultation?: {
+    preferredTime: string;
+    topic: string;
+    description: string;
+  };
 }
 
 // 兼容旧接口

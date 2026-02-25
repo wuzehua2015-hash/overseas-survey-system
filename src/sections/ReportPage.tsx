@@ -3,6 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Download, 
   RotateCcw, 
@@ -22,7 +26,9 @@ import {
   Lightbulb,
   Zap,
   Shield,
-  Wallet
+  Wallet,
+  Send,
+  Clock
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -121,6 +127,15 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
 
+  // 预约表单状态
+  const [consultationForm, setConsultationForm] = useState({
+    preferredTime: '',
+    topic: '',
+    description: ''
+  });
+  const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
+  const [consultationSubmitted, setConsultationSubmitted] = useState(false);
+
   const { 
     companyProfile,
     assessmentResult, 
@@ -142,6 +157,7 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
       const submissionData: FullSubmissionData = {
         id,
         timestamp: new Date().toISOString(),
+        dataType: '完整问卷',
         profile: {
           companyName: companyProfile.name || '未填写',
           contactName: companyProfile.contactName || '未填写',
@@ -262,6 +278,67 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
       mature: 'from-purple-600 to-purple-700',
     };
     return colors[stage] || 'from-slate-600 to-slate-700';
+  };
+
+  // 处理预约表单提交
+  const handleConsultationSubmit = async () => {
+    if (!consultationForm.preferredTime || !consultationForm.topic) {
+      alert('请填写期望咨询时间和咨询主题');
+      return;
+    }
+
+    setIsSubmittingConsultation(true);
+    
+    try {
+      // 生成唯一ID
+      const id = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // 构建预约咨询数据
+      const consultationData: FullSubmissionData = {
+        id,
+        timestamp: new Date().toISOString(),
+        dataType: '预约咨询',
+        profile: {
+          companyName: companyProfile.name || '未填写',
+          contactName: companyProfile.contactName || '未填写',
+          contactPhone: companyProfile.contactPhone || '未填写',
+          contactEmail: companyProfile.contactEmail || '未填写',
+          industry: companyProfile.industry || '未填写',
+          companyNature: companyProfile.companyNature || '未填写',
+          companyType: companyProfile.companyType || '未填写',
+          annualRevenue: companyProfile.annualRevenue || '未填写',
+          employeeCount: companyProfile.employeeCount || '未填写',
+          mainProduct: companyProfile.mainProduct || '未填写',
+          coreCompetency: companyProfile.coreCompetency || [],
+        },
+        assessment: {
+          score: assessmentResult.totalScore,
+          stage: assessmentResult.stage,
+          level: assessmentResult.level,
+          dimensionScores: assessmentResult.dimensionScores,
+        },
+        consultation: {
+          preferredTime: consultationForm.preferredTime,
+          topic: consultationForm.topic,
+          description: consultationForm.description
+        }
+      };
+
+      console.log('正在提交预约咨询到 GitHub...', consultationData);
+      const result = await submitToGitHub(consultationData);
+      console.log('预约提交结果:', result);
+      
+      if (result.success) {
+        setConsultationSubmitted(true);
+      } else {
+        alert('提交失败，请稍后重试');
+      }
+    } catch (error) {
+      console.error('预约提交失败:', error);
+      alert('提交失败，请稍后重试');
+    } finally {
+      setIsSubmittingConsultation(false);
+    }
   };
 
   return (
@@ -739,43 +816,116 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
             </TabsContent>
           </Tabs>
 
-          {/* 联系方式 */}
+          {/* 预约咨询表单 */}
           <Card className="mt-6">
             <CardHeader className={`bg-gradient-to-r ${getStageBg(assessmentResult.stage)} text-white`}>
               <CardTitle className="flex items-center gap-2">
-                <Phone className="w-5 h-5" />
-                联系我们获取深度服务
+                <Calendar className="w-5 h-5" />
+                预约咨询服务
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-3">聊商联盟海外服务部</h4>
-                  <div className="space-y-2 text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4" />
-                      <span>13346257732</span>
+              {consultationSubmitted ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">预约提交成功！</h3>
+                  <p className="text-slate-600">我们的顾问将在24小时内与您联系，确认咨询时间</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="preferredTime" className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        期望咨询时间 <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="preferredTime"
+                        type="datetime-local"
+                        value={consultationForm.preferredTime}
+                        onChange={(e) => setConsultationForm({ ...consultationForm, preferredTime: e.target.value })}
+                        className="mt-1"
+                      />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="w-4 h-4" />
-                      <span>微信：PatrickWu1104</span>
+                    <div>
+                      <Label htmlFor="topic" className="flex items-center gap-2">
+                        <Briefcase className="w-4 h-4" />
+                        咨询主题 <span className="text-red-500">*</span>
+                      </Label>
+                      <Select
+                        value={consultationForm.topic}
+                        onValueChange={(value) => setConsultationForm({ ...consultationForm, topic: value })}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="请选择咨询主题" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="市场准入">市场准入</SelectItem>
+                          <SelectItem value="认证服务">认证服务</SelectItem>
+                          <SelectItem value="品牌出海">品牌出海</SelectItem>
+                          <SelectItem value="数字化">数字化</SelectItem>
+                          <SelectItem value="其他">其他</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="description" className="flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4" />
+                        具体需求描述
+                      </Label>
+                      <Textarea
+                        id="description"
+                        placeholder="请描述您的具体需求，以便我们为您安排合适的顾问..."
+                        value={consultationForm.description}
+                        onChange={(e) => setConsultationForm({ ...consultationForm, description: e.target.value })}
+                        className="mt-1 min-h-[120px]"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:col-span-2 flex items-center justify-between">
+                    <div className="text-sm text-slate-500">
+                      <span className="text-red-500">*</span> 为必填项
+                    </div>
+                    <Button 
+                      onClick={handleConsultationSubmit} 
+                      disabled={isSubmittingConsultation}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Send className="w-4 h-4" />
+                      {isSubmittingConsultation ? '提交中...' : '提交预约'}
+                    </Button>
+                  </div>
                 </div>
-                <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                  <h4 className="font-semibold text-amber-800 mb-2">专属权益</h4>
-                  <ul className="space-y-1 text-sm text-amber-700">
-                    <li>• 1对1深度咨询</li>
-                    <li>• 免费线下走访</li>
-                    <li>• 定制化解决方案</li>
-                    <li>• 会员专属优惠</li>
-                  </ul>
+              )}
+              <div className="mt-6 pt-6 border-t">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-slate-900 mb-3">聊商联盟海外服务部</h4>
+                    <div className="space-y-2 text-slate-600">
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        <span>13346257732</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4" />
+                        <span>微信：PatrickWu1104</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                    <h4 className="font-semibold text-amber-800 mb-2">专属权益</h4>
+                    <ul className="space-y-1 text-sm text-amber-700">
+                      <li>• 1对1深度咨询</li>
+                      <li>• 免费线下走访</li>
+                      <li>• 定制化解决方案</li>
+                      <li>• 会员专属优惠</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-6 pt-6 border-t text-center">
-                <p className="text-slate-600">
-                  建议于 <span className="font-semibold text-red-600">7日内</span> 联系我们，获取详细解读
-                </p>
               </div>
             </CardContent>
           </Card>
