@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,7 @@ import {
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import type { ReportData } from '@/types/questionnaire';
+import { submitToGitHub, type FullSubmissionData } from '@/services/githubStorage';
 
 interface ReportPageProps {
   reportData: ReportData;
@@ -118,6 +119,7 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
 
   const { 
     companyProfile,
@@ -129,6 +131,53 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
     investmentPlan,
     dataSummary
   } = reportData;
+
+  // 自动提交数据到 GitHub - 只要用户点击"生成报告"就存储，不检查基本信息是否完整
+  useEffect(() => {
+    const autoSubmitData = async () => {
+      // 生成唯一ID
+      const id = `submission_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // 构建提交数据 - 即使某些字段为空也提交
+      const submissionData: FullSubmissionData = {
+        id,
+        timestamp: new Date().toISOString(),
+        profile: {
+          companyName: companyProfile.name || '未填写',
+          contactName: companyProfile.contactName || '未填写',
+          contactPhone: companyProfile.contactPhone || '未填写',
+          contactEmail: companyProfile.contactEmail || '未填写',
+          industry: companyProfile.industry || '未填写',
+          companyNature: companyProfile.companyNature || '未填写',
+          companyType: companyProfile.companyType || '未填写',
+          annualRevenue: companyProfile.annualRevenue || '未填写',
+          employeeCount: companyProfile.employeeCount || '未填写',
+          mainProduct: companyProfile.mainProduct || '未填写',
+          coreCompetency: companyProfile.coreCompetency || [],
+        },
+        assessment: {
+          score: assessmentResult.totalScore,
+          stage: assessmentResult.stage,
+          level: assessmentResult.level,
+          dimensionScores: assessmentResult.dimensionScores,
+        },
+        // 可选：保存完整数据用于深度分析
+        fullData: {
+          companyProfile,
+          assessmentResult,
+          dataSummary,
+        }
+      };
+
+      console.log('正在提交测评数据到 GitHub...', submissionData);
+      const result = await submitToGitHub(submissionData);
+      console.log('提交结果:', result);
+      setSubmitStatus(result);
+    };
+
+    // 执行提交
+    autoSubmitData();
+  }, []); // 只在组件挂载时执行一次
 
   const handleDownloadPDF = async () => {
     if (!pdfContentRef.current) return;

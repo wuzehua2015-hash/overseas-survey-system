@@ -3,6 +3,42 @@ const REPO_OWNER = 'wuzehua2015-hash';
 const REPO_NAME = 'overseas-survey-system';
 const DATA_PATH = 'data/submissions';
 
+// 完整问卷数据接口
+export interface FullSubmissionData {
+  id: string;
+  timestamp: string;
+  // 企业画像
+  profile: {
+    companyName: string;
+    contactName: string;
+    contactPhone: string;
+    contactEmail: string;
+    industry: string;
+    companyNature: string;
+    companyType: string;
+    annualRevenue: string;
+    employeeCount: string;
+    mainProduct: string;
+    coreCompetency: string[];
+  };
+  // 评估结果
+  assessment: {
+    score: number;
+    stage: string;
+    level: string;
+    dimensionScores: {
+      foundation: number;
+      product: number;
+      operation: number;
+      resource: number;
+      potential: number;
+    };
+  };
+  // 完整问卷数据（可选，用于深度分析）
+  fullData?: Record<string, unknown>;
+}
+
+// 兼容旧接口
 export interface SubmissionData {
   id: string;
   companyName: string;
@@ -16,7 +52,7 @@ export interface SubmissionData {
   timestamp: string;
 }
 
-export async function submitToGitHub(data: SubmissionData): Promise<{ success: boolean; message: string }> {
+export async function submitToGitHub(data: SubmissionData | FullSubmissionData): Promise<{ success: boolean; message: string }> {
   try {
     // 检查 GitHub Token 是否可用
     if (!GITHUB_TOKEN || GITHUB_TOKEN === '__VITE_GITHUB_TOKEN__') {
@@ -29,7 +65,7 @@ export async function submitToGitHub(data: SubmissionData): Promise<{ success: b
     }
 
     const filename = `${DATA_PATH}/${data.id}.json`;
-    const content = btoa(JSON.stringify(data, null, 2));
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
     // 检查文件是否已存在
     let sha: string | undefined;
@@ -54,7 +90,7 @@ export async function submitToGitHub(data: SubmissionData): Promise<{ success: b
 
     // 创建或更新文件
     const body: any = {
-      message: `Add submission: ${data.companyName}`,
+      message: `Add submission: ${(data as SubmissionData).companyName || (data as FullSubmissionData).profile?.companyName || 'Unknown'}`,
       content: content,
       branch: 'gh-pages'
     };
@@ -101,16 +137,17 @@ export async function submitToGitHub(data: SubmissionData): Promise<{ success: b
   }
 }
 
-function saveToLocalStorage(data: SubmissionData): void {
+function saveToLocalStorage(data: SubmissionData | FullSubmissionData): void {
   const key = `survey_submissions_${data.id}`;
   localStorage.setItem(key, JSON.stringify(data));
   
   // 同时保存到列表中
   const listKey = 'survey_submissions_list';
   const existingList = JSON.parse(localStorage.getItem(listKey) || '[]');
+  const companyName = (data as SubmissionData).companyName || (data as FullSubmissionData).profile?.companyName || 'Unknown';
   existingList.push({
     id: data.id,
-    companyName: data.companyName,
+    companyName: companyName,
     timestamp: data.timestamp,
     synced: false
   });
@@ -122,7 +159,7 @@ export function getLocalSubmissions(): Array<{ id: string; companyName: string; 
   return JSON.parse(localStorage.getItem(listKey) || '[]');
 }
 
-export function getLocalSubmissionById(id: string): SubmissionData | null {
+export function getLocalSubmissionById(id: string): SubmissionData | FullSubmissionData | null {
   const key = `survey_submissions_${id}`;
   const data = localStorage.getItem(key);
   return data ? JSON.parse(data) : null;
