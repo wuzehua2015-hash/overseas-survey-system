@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
     steps:
       - uses: actions/checkout@v4
       
@@ -15,14 +18,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ./app/package-lock.json
       
       - name: Install dependencies
         run: npm install
-        working-directory: ./app
       
       - name: Build
         run: npm run build
-        working-directory: ./app
       
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
