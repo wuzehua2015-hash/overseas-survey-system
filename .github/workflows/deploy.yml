@@ -27,17 +27,17 @@ jobs:
           node-version: '20'
           
       - name: Install dependencies
-        run: cd app && npm ci
+        run: npm ci
         
       - name: Build
-        run: cd app && npm run build
+        run: npm run build
         env:
           VITE_GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./app/dist
+          path: ./dist
 
   deploy:
     environment:
