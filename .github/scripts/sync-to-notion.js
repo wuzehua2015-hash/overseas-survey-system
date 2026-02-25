@@ -193,11 +193,19 @@ async function submitToFullSurveyDatabase(submission) {
 // 提交到 Notion - 预约咨询数据库
 async function submitToConsultationDatabase(submission) {
   // 检查数据库 ID 是否有效
-  if (!NOTION_CONSULTATION_DATABASE_ID || NOTION_CONSULTATION_DATABASE_ID.length < 30) {
-    console.warn(`⚠️ 跳过预约咨询同步: NOTION_CONSULTATION_DATABASE_ID 无效`);
-    console.warn(`   值: ${NOTION_CONSULTATION_DATABASE_ID || 'undefined'}`);
-    console.warn(`   请检查 GitHub Secrets 设置`);
-    return Promise.resolve({ skipped: true, reason: 'database_id_invalid' });
+  console.log(`DEBUG: NOTION_CONSULTATION_DATABASE_ID = "${NOTION_CONSULTATION_DATABASE_ID}"`);
+  console.log(`DEBUG: Length = ${NOTION_CONSULTATION_DATABASE_ID ? NOTION_CONSULTATION_DATABASE_ID.length : 0}`);
+  
+  if (!NOTION_CONSULTATION_DATABASE_ID) {
+    console.error('❌ NOTION_CONSULTATION_DATABASE_ID 未定义');
+    console.error('   请检查 GitHub Secrets 中是否正确设置了该变量');
+    return Promise.reject(new Error('NOTION_CONSULTATION_DATABASE_ID not defined'));
+  }
+  
+  if (NOTION_CONSULTATION_DATABASE_ID.length < 30) {
+    console.error(`❌ NOTION_CONSULTATION_DATABASE_ID 格式无效: "${NOTION_CONSULTATION_DATABASE_ID}"`);
+    console.error(`   长度: ${NOTION_CONSULTATION_DATABASE_ID.length}，期望: 36`);
+    return Promise.reject(new Error('NOTION_CONSULTATION_DATABASE_ID invalid format'));
   }
   
   return new Promise((resolve, reject) => {
