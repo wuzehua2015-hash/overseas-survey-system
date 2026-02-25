@@ -1,0 +1,24 @@
+name: Sync to Notion
+
+on:
+  push:
+    paths:
+      - 'data/submissions/**'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Sync new submissions to Notion
+        run: node .github/scripts/sync-to-notion.js
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: 31155e5e-0a9e-8142-8361-c394d107afe3
