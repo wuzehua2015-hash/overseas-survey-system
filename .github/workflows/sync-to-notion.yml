@@ -2,23 +2,39 @@ name: Sync to Notion
 
 on:
   push:
+    branches:
+      - gh-pages
     paths:
       - 'data/submissions/**'
+  schedule:
+    - cron: '*/5 * * * *'  # 每5分钟
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      # 检出 main 分支（代码）
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      
+      # 检出 gh-pages 分支（数据）
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
       
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          
+          node-version: '20'
+      
       - name: Sync new submissions to Notion
+        working-directory: ./main
         run: node .github/scripts/sync-to-notion.js
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: 31155e5e-0a9e-8142-8361-c394d107afe3
+          DATA_PATH: '../gh-pages/data/submissions'
