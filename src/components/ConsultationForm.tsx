@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Phone, Mail, User, Building2, CheckCircle, Loader2, Sparkles, ArrowRight, Calendar, MessageCircle } from 'lucide-react';
 import { submitToGitHub, type SubmissionData } from '@/services/githubStorage';
 import { industryOptions } from '@/types/questionnaire';
@@ -35,6 +37,12 @@ export function ConsultationForm({
     contactPhone: contactPhone,
     contactEmail: contactEmail,
     industry: industry,
+  });
+  // 预约咨询特有字段
+  const [consultationData, setConsultationData] = useState({
+    preferredTime: '',
+    topic: '',
+    description: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -92,7 +100,12 @@ export function ConsultationForm({
       stage: stage,
       level: level,
       timestamp: new Date().toISOString(),
-      type: 'consultation',
+      dataType: '预约咨询',
+      consultation: {
+        preferredTime: consultationData.preferredTime,
+        topic: consultationData.topic,
+        description: consultationData.description
+      }
     };
 
     try {
@@ -335,6 +348,61 @@ export function ConsultationForm({
                   className="h-12"
                 />
               </div>
+
+              {/* 预约咨询特有字段 - 仅在显示预约表单时显示 */}
+              {showBookingForm && (
+                <>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="preferredTime" className="flex items-center gap-2 text-slate-700">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                      期望咨询时间
+                    </Label>
+                    <Input
+                      id="preferredTime"
+                      type="datetime-local"
+                      value={consultationData.preferredTime}
+                      onChange={(e) => setConsultationData(prev => ({ ...prev, preferredTime: e.target.value }))}
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="topic" className="flex items-center gap-2 text-slate-700">
+                      <MessageCircle className="w-4 h-4 text-blue-500" />
+                      咨询主题
+                    </Label>
+                    <Select
+                      value={consultationData.topic}
+                      onValueChange={(value) => setConsultationData(prev => ({ ...prev, topic: value }))}
+                    >
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="请选择咨询主题" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="市场准入">市场准入</SelectItem>
+                        <SelectItem value="认证服务">认证服务</SelectItem>
+                        <SelectItem value="品牌出海">品牌出海</SelectItem>
+                        <SelectItem value="数字化">数字化</SelectItem>
+                        <SelectItem value="其他">其他</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="description" className="flex items-center gap-2 text-slate-700">
+                      <MessageCircle className="w-4 h-4 text-blue-500" />
+                      具体需求描述
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={consultationData.description}
+                      onChange={(e) => setConsultationData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="请描述您的具体需求和问题"
+                      rows={4}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {assessmentScore > 0 && (

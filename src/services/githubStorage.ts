@@ -15,6 +15,14 @@ export interface SubmissionData {
   level?: string;
   timestamp: string;
   isPartial?: boolean;
+  // 数据类型：完整问卷 或 预约咨询
+  dataType?: '完整问卷' | '预约咨询';
+  // 预约咨询特有字段
+  consultation?: {
+    preferredTime?: string;
+    topic?: string;
+    description?: string;
+  };
   // 完整问卷数据（可选）
   type?: 'complete_questionnaire' | 'consultation';
   completeData?: {
