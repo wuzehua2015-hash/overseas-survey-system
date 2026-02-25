@@ -4,10 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>海外企业服务AI Agent问卷系统</title>
-    <script type="module" crossorigin src="./assets/index-BjfmQjmm.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-D08ze4xR.css">
+    <script>
+      // GitHub Token 从环境变量注入（构建时替换）
+      window.VITE_GITHUB_TOKEN = '__VITE_GITHUB_TOKEN__';
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
