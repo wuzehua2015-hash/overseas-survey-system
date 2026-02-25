@@ -28,11 +28,6 @@ function getSubmissions() {
   return submissions;
 }
 
-// 检查是否已同步到 Notion
-async function isSynced(submission) {
-  return false;
-}
-
 // 提交到 Notion
 async function submitToNotion(submission) {
   return new Promise((resolve, reject) => {
@@ -46,10 +41,10 @@ async function submitToNotion(submission) {
           rich_text: [{ text: { content: submission.contactName || '' } }]
         },
         '联系电话': {
-          rich_text: [{ text: { content: submission.phone || '' } }]
+          phone_number: submission.phone || ''
         },
         '联系邮箱': {
-          rich_text: [{ text: { content: submission.email || '' } }]
+          email: submission.email || ''
         },
         '所属行业': {
           rich_text: [{ text: { content: submission.industry || '' } }]
@@ -58,10 +53,10 @@ async function submitToNotion(submission) {
           number: submission.assessmentScore || 0
         },
         '出海阶段': {
-          rich_text: [{ text: { content: submission.stage || '' } }]
+          select: { name: submission.stage || '' }
         },
         '企业等级': {
-          rich_text: [{ text: { content: submission.companyLevel || '' } }]
+          select: { name: submission.companyLevel || '' }
         },
         '提交时间': {
           date: { start: submission.submitTime || new Date().toISOString() }
