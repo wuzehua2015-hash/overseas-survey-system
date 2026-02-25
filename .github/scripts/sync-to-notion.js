@@ -302,8 +302,15 @@ async function main() {
     process.exit(1);
   }
 
-  if (!NOTION_CONSULTATION_DATABASE_ID) {
+  // 调试日志：检查环境变量
+  console.log('环境变量检查:');
+  console.log(`  NOTION_API_KEY: ${NOTION_API_KEY ? '已设置' : '未设置'}`);
+  console.log(`  NOTION_DATABASE_ID: ${NOTION_DATABASE_ID}`);
+  console.log(`  NOTION_CONSULTATION_DATABASE_ID: ${NOTION_CONSULTATION_DATABASE_ID || '未设置'}`);
+  
+  if (!NOTION_CONSULTATION_DATABASE_ID || NOTION_CONSULTATION_DATABASE_ID === '***' || NOTION_CONSULTATION_DATABASE_ID.length < 30) {
     console.warn('警告: 未设置 NOTION_CONSULTATION_DATABASE_ID，预约咨询数据将不会同步');
+    console.warn('请检查 GitHub Secrets 中是否正确设置了 NOTION_CONSULTATION_DATABASE_ID');
   }
   
   const submissions = getSubmissions();
