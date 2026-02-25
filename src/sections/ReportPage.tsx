@@ -3,10 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Download, 
   RotateCcw, 
@@ -26,14 +22,20 @@ import {
   Lightbulb,
   Zap,
   Shield,
-  Wallet,
-  Send,
-  Clock
+  Wallet
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import type { ReportData } from '@/types/questionnaire';
-import { submitToGitHub, type FullSubmissionData } from '@/services/githubStorage';
+import { ConsultationForm } from '@/components/ConsultationForm';
+import { CoreSummary } from '@/components/CoreSummary';
+import { SocialProof } from '@/components/SocialProof';
+import { LimitedOffer } from '@/components/LimitedOffer';
+import { ShareReport } from '@/components/ShareReport';
+import { autoSubmitContactInfo } from '@/services/autoSubmit';
+import { industryOptions } from '@/types/questionnaire';
+import { findBenchmarkCompanies, generateMatchDescription } from '@/utils/benchmarkMatcher';
+import { recommendMarkets, generateMarketDescription } from '@/utils/marketRecommender';
+import { ReportCover } from '@/components/ReportCover';
+import { generateProfessionalPDF } from '@/services/pdfGenerator';
 
 interface ReportPageProps {
   reportData: ReportData;
@@ -125,16 +127,6 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
-
-  // 预约表单状态
-  const [consultationForm, setConsultationForm] = useState({
-    preferredTime: '',
-    topic: '',
-    description: ''
-  });
-  const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
-  const [consultationSubmitted, setConsultationSubmitted] = useState(false);
 
   const { 
     companyProfile,
@@ -147,109 +139,88 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
     dataSummary
   } = reportData;
 
-  // 自动提交数据到 GitHub - 只要用户点击"生成报告"就存储，不检查基本信息是否完整
+  // 使用智能匹配算法获取对标企业和市场推荐
+  // 注意：如果匹配失败，回退到使用 reportData 中已有的数据
+  let matchedBenchmarks: { company: typeof benchmarkCompanies[0]; score: number; matchReasons: string[] }[];
+  let matchedMarkets: (typeof marketRecommendations[0] & { fitScore?: number })[];
+  
+  try {
+    // 尝试从 dataSummary 中提取原始数据（简化版本）
+    const diagnosisData: any = {
+      stage: assessmentResult.stage,
+      targetMarkets: dataSummary.resource['目标市场']?.toString().split('、') || [],
+    };
+    
+    const productData: any = {
+      pricePositioning: 'mid', // 默认值
+      certifications: dataSummary.product['已获认证']?.toString().includes('项') ? ['CE'] : [],
+    };
+    
+    const bmResult = findBenchmarkCompanies(companyProfile, diagnosisData, 3);
+    const mrResult = recommendMarkets(companyProfile, productData, diagnosisData, 3);
+    
+    // 确保返回的数据格式正确
+    matchedBenchmarks = bmResult.map((m: any) => ({
+      company: m.company,
+      score: m.score,
+      matchReasons: m.matchReasons,
+    }));
+    
+    matchedMarkets = mrResult.map((m: any) => ({
+      ...m,
+      fitScore: m.fitScore || 80,
+    }));
+  } catch (error) {
+    console.error('智能匹配失败，使用默认数据:', error);
+    // 回退到使用 reportData 中已有的数据
+    matchedBenchmarks = benchmarkCompanies.map((company, index) => ({
+      company,
+      score: 95 - index * 5,
+      matchReasons: ['行业相关', '规模相近'],
+    }));
+    matchedMarkets = marketRecommendations.map((market) => ({
+      ...market,
+      fitScore: market.fitScore || 80,
+    }));
+  }
+
+  // 自动提交联系信息（静默模式）
   useEffect(() => {
-    const autoSubmitData = async () => {
-      // 生成唯一ID
-      const id = `submission_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 构建提交数据 - 即使某些字段为空也提交
-      const submissionData: FullSubmissionData = {
-        id,
-        timestamp: new Date().toISOString(),
-        dataType: '完整问卷',
-        profile: {
-          companyName: companyProfile.name || '未填写',
-          contactName: companyProfile.contactName || '未填写',
-          contactPhone: companyProfile.contactPhone || '未填写',
-          contactEmail: companyProfile.contactEmail || '未填写',
-          industry: companyProfile.industry || '未填写',
-          companyNature: companyProfile.companyNature || '未填写',
-          companyType: companyProfile.companyType || '未填写',
-          annualRevenue: companyProfile.annualRevenue || '未填写',
-          employeeCount: companyProfile.employeeCount || '未填写',
-          mainProduct: companyProfile.mainProduct || '未填写',
-          coreCompetency: companyProfile.coreCompetency || [],
+    const submitContact = async () => {
+      await autoSubmitContactInfo(
+        {
+          name: companyProfile.name,
+          contactName: companyProfile.contactName,
+          contactPhone: companyProfile.contactPhone,
+          contactEmail: companyProfile.contactEmail,
+          industry: companyProfile.industry,
         },
-        assessment: {
-          score: assessmentResult.totalScore,
+        {
+          totalScore: assessmentResult.totalScore,
           stage: assessmentResult.stage,
           level: assessmentResult.level,
-          dimensionScores: assessmentResult.dimensionScores,
-        },
-        // 可选：保存完整数据用于深度分析
-        fullData: {
-          companyProfile,
-          assessmentResult,
-          dataSummary,
         }
-      };
-
-      console.log('正在提交测评数据到 GitHub...', submissionData);
-      const result = await submitToGitHub(submissionData);
-      console.log('提交结果:', result);
-      setSubmitStatus(result);
+      );
+      // 静默处理，不显示任何状态
     };
 
-    // 执行提交
-    autoSubmitData();
-  }, []); // 只在组件挂载时执行一次
+    submitContact();
+  }, [companyProfile, assessmentResult]);
+
+  // 获取行业中文名称
+  const getIndustryLabel = (value: string): string => {
+    const industry = industryOptions.find(i => i.value === value);
+    return industry?.label || value;
+  };
 
   const handleDownloadPDF = async () => {
-    if (!pdfContentRef.current) return;
-    
     setIsGenerating(true);
     try {
-      // 临时显示PDF内容容器
-      pdfContentRef.current.style.display = 'block';
-      pdfContentRef.current.style.position = 'absolute';
-      pdfContentRef.current.style.left = '-9999px';
-      pdfContentRef.current.style.top = '0';
-      pdfContentRef.current.style.width = '1200px';
-      
-      const canvas = await html2canvas(pdfContentRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        windowWidth: 1200,
+      await generateProfessionalPDF({
+        companyName: companyProfile.name,
+        assessmentResult,
+        actionPlan,
       });
-      
-      // 恢复隐藏
-      pdfContentRef.current.style.display = 'none';
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      
-      const scaledWidth = imgWidth * ratio;
-      const scaledHeight = imgHeight * ratio;
-      
-      // 计算需要多少页
-      const pageHeight = pdfHeight - 20; // 留出边距
-      const pageCount = Math.ceil(scaledHeight / pageHeight);
-      
-      for (let i = 0; i < pageCount; i++) {
-        if (i > 0) pdf.addPage();
-        
-        pdf.addImage(
-          imgData, 
-          'PNG', 
-          10, 
-          10 - (i * pageHeight), 
-          scaledWidth, 
-          scaledHeight,
-          '',
-          'FAST',
-          0
-        );
-      }
-      
-      pdf.save(`${companyProfile.name}_出海成熟度评估报告.pdf`);
     } catch (error) {
       console.error('PDF generation failed:', error);
       alert('PDF生成失败，请重试');
@@ -280,72 +251,16 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
     return colors[stage] || 'from-slate-600 to-slate-700';
   };
 
-  // 处理预约表单提交
-  const handleConsultationSubmit = async () => {
-    if (!consultationForm.preferredTime || !consultationForm.topic) {
-      alert('请填写期望咨询时间和咨询主题');
-      return;
-    }
-
-    setIsSubmittingConsultation(true);
-    
-    try {
-      // 生成唯一ID
-      const id = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 构建预约咨询数据
-      const consultationData: FullSubmissionData = {
-        id,
-        timestamp: new Date().toISOString(),
-        dataType: '预约咨询',
-        profile: {
-          companyName: companyProfile.name || '未填写',
-          contactName: companyProfile.contactName || '未填写',
-          contactPhone: companyProfile.contactPhone || '未填写',
-          contactEmail: companyProfile.contactEmail || '未填写',
-          industry: companyProfile.industry || '未填写',
-          companyNature: companyProfile.companyNature || '未填写',
-          companyType: companyProfile.companyType || '未填写',
-          annualRevenue: companyProfile.annualRevenue || '未填写',
-          employeeCount: companyProfile.employeeCount || '未填写',
-          mainProduct: companyProfile.mainProduct || '未填写',
-          coreCompetency: companyProfile.coreCompetency || [],
-        },
-        assessment: {
-          score: assessmentResult.totalScore,
-          stage: assessmentResult.stage,
-          level: assessmentResult.level,
-          dimensionScores: assessmentResult.dimensionScores,
-        },
-        consultation: {
-          preferredTime: consultationForm.preferredTime,
-          topic: consultationForm.topic,
-          description: consultationForm.description
-        }
-      };
-
-      console.log('正在提交预约咨询到 GitHub...', consultationData);
-      const result = await submitToGitHub(consultationData);
-      console.log('预约提交结果:', result);
-      
-      if (result.success) {
-        setConsultationSubmitted(true);
-      } else {
-        alert('提交失败，请稍后重试');
-      }
-    } catch (error) {
-      console.error('预约提交失败:', error);
-      alert('提交失败，请稍后重试');
-    } finally {
-      setIsSubmittingConsultation(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* 操作按钮 */}
         <div className="flex justify-end gap-4 mb-6">
+          <ShareReport 
+            companyName={companyProfile.name}
+            score={assessmentResult.totalScore}
+            level={assessmentResult.level}
+          />
           <Button variant="outline" onClick={onReset} className="flex items-center gap-2">
             <RotateCcw className="w-4 h-4" />
             重新评估
@@ -357,33 +272,27 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
         </div>
 
         {/* 报告内容 */}
-        <div ref={reportRef} className="space-y-6 bg-white">
-          {/* 封面 */}
-          <Card className="shadow-lg overflow-hidden border-0">
-            <div className={`bg-gradient-to-r ${getStageBg(assessmentResult.stage)} text-white p-12`}>
-              <div className="text-center">
-                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full text-sm mb-6">
-                  <Building2 className="w-4 h-4" />
-                  聊商联盟海外服务部
-                </div>
-                <h1 className="text-4xl font-bold mb-4">{companyProfile.name}</h1>
-                <p className="text-xl text-white/80 mb-8">企业出海成熟度评估报告</p>
-                <div className="flex justify-center items-center gap-8">
-                  <div className="text-center">
-                    <div className="text-5xl font-bold">{assessmentResult.totalScore}</div>
-                    <div className="text-sm text-white/70">综合得分</div>
-                  </div>
-                  <div className="w-px h-16 bg-white/30" />
-                  <div className="text-center">
-                    <div className={`inline-block px-4 py-2 rounded-full text-lg font-bold ${getStageColor(assessmentResult.stage)}`}>
-                      {assessmentResult.level}
-                    </div>
-                    <div className="text-sm text-white/70 mt-1">企业等级</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
+        <div ref={reportRef} className="space-y-6">
+          {/* 报告封面 */}
+          <ReportCover
+            companyName={companyProfile.name}
+            totalScore={assessmentResult.totalScore}
+            stage={assessmentResult.stage}
+            level={assessmentResult.level}
+            industry={getIndustryLabel(companyProfile.industry)}
+          />
+
+          {/* 核心结论 */}
+          <CoreSummary
+            companyName={companyProfile.name}
+            totalScore={assessmentResult.totalScore}
+            stage={assessmentResult.stage}
+            level={assessmentResult.level}
+            dimensionScores={assessmentResult.dimensionScores}
+          />
+
+          {/* 限时福利 */}
+          <LimitedOffer onConsultClick={() => document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' })} />
 
           {/* 报告主体 */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -581,57 +490,61 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
 
             {/* 标杆对标 */}
             <TabsContent value="benchmark" className="space-y-6 mt-6">
-              {benchmarkCompanies.map((company, index) => (
-                <Card key={company.id}>
-                  <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                          <Star className="w-5 h-5 text-amber-500" />
-                          {company.name}
-                        </CardTitle>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <Badge variant="secondary">{company.industry}</Badge>
-                          <Badge variant="secondary">{company.location}</Badge>
-                          <Badge variant="secondary">{company.annualRevenue}</Badge>
+              {matchedBenchmarks.map((match) => {
+                const company = match.company;
+                return (
+                  <Card key={company.id}>
+                    <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2 text-xl">
+                            <Star className="w-5 h-5 text-amber-500" />
+                            {company.name}
+                          </CardTitle>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <Badge variant="secondary">{getIndustryLabel(company.industry)}</Badge>
+                            <Badge variant="secondary">{company.location}</Badge>
+                            <Badge variant="secondary">{company.annualRevenue}</Badge>
+                          </div>
+                          <p className="text-sm text-slate-600 mt-2">{generateMatchDescription(match)}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-slate-500">对标指数</div>
+                          <div className="text-2xl font-bold text-blue-600">{match.score}%</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm text-slate-500">对标指数</div>
-                        <div className="text-2xl font-bold text-blue-600">{95 - index * 5}%</div>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-6">
+                      <div>
+                        <h4 className="font-semibold text-slate-900 mb-2">核心业务</h4>
+                        <p className="text-slate-600">{company.coreCompetency}</p>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4 pt-6">
-                    <div>
-                      <h4 className="font-semibold text-slate-900 mb-2">核心业务</h4>
-                      <p className="text-slate-600">{company.coreCompetency}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 mb-2">出海成就</h4>
-                      <ul className="space-y-1">
-                        {company.keyMilestones.slice(0, 3).map((m, i) => (
-                          <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
-                            <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                            {m}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 mb-2">可借鉴点</h4>
-                      <ul className="space-y-1">
-                        {company.learnablePoints.map((p, i) => (
-                          <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
-                            <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                            {p}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div>
+                        <h4 className="font-semibold text-slate-900 mb-2">出海成就</h4>
+                        <ul className="space-y-1">
+                          {company.keyMilestones.slice(0, 3).map((m, i) => (
+                            <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                              {m}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 mb-2">可借鉴点</h4>
+                        <ul className="space-y-1">
+                          {company.learnablePoints.map((p, i) => (
+                            <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                              <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                              {p}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </TabsContent>
 
             {/* 市场与服务 */}
@@ -646,7 +559,7 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {marketRecommendations.map((market, i) => (
+                    {matchedMarkets.map((market, i) => (
                       <div key={i} className={`p-4 rounded-lg border-2 ${
                         market.priority === 'high' ? 'border-emerald-200 bg-emerald-50' :
                         market.priority === 'medium' ? 'border-blue-200 bg-blue-50' :
@@ -666,7 +579,7 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                               </Badge>
                             </div>
                             <div className="flex flex-wrap gap-2 mt-2">
-                              {market.countries.map(c => (
+                              {market.countries?.map(c => (
                                 <span key={c} className="text-sm bg-white px-2 py-1 rounded">{c}</span>
                               ))}
                             </div>
@@ -676,7 +589,8 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                             <div className="text-2xl font-bold text-blue-600">{market.fitScore}%</div>
                           </div>
                         </div>
-                        <p className="text-sm text-slate-600 mb-3">{market.rationale}</p>
+                        <p className="text-sm text-slate-600 mb-3">{generateMarketDescription(market)}</p>
+                        
                         <div className="grid md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className="text-slate-500">进入策略：</span>
@@ -691,6 +605,17 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                             <span className="text-slate-700">{market.timeline}</span>
                           </div>
                         </div>
+                        
+                        {market.keyRequirements && market.keyRequirements.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-slate-200">
+                            <span className="text-sm text-slate-500">关键要求：</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {market.keyRequirements.map((req, idx) => (
+                                <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">{req}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -816,116 +741,62 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
             </TabsContent>
           </Tabs>
 
-          {/* 预约咨询表单 */}
+          {/* 社交证明 */}
+          <div className="mt-6">
+            <SocialProof />
+          </div>
+
+          {/* 咨询表单 */}
+          <div id="consultation-form" className="mt-6">
+            <ConsultationForm 
+              companyName={companyProfile.name}
+              assessmentScore={assessmentResult.totalScore}
+              stage={assessmentResult.stage}
+              level={assessmentResult.level}
+              industry={companyProfile.industry}
+              contactName={companyProfile.contactName}
+              contactPhone={companyProfile.contactPhone}
+              contactEmail={companyProfile.contactEmail}
+            />
+          </div>
+
+          {/* 联系方式 */}
           <Card className="mt-6">
             <CardHeader className={`bg-gradient-to-r ${getStageBg(assessmentResult.stage)} text-white`}>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                预约咨询服务
+                <Phone className="w-5 h-5" />
+                联系我们获取深度服务
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              {consultationSubmitted ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="w-8 h-8 text-emerald-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-2">预约提交成功！</h3>
-                  <p className="text-slate-600">我们的顾问将在24小时内与您联系，确认咨询时间</p>
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="preferredTime" className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        期望咨询时间 <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="preferredTime"
-                        type="datetime-local"
-                        value={consultationForm.preferredTime}
-                        onChange={(e) => setConsultationForm({ ...consultationForm, preferredTime: e.target.value })}
-                        className="mt-1"
-                      />
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-slate-900 mb-3">聊商联盟海外服务部</h4>
+                  <div className="space-y-2 text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      <span>13346257732</span>
                     </div>
-                    <div>
-                      <Label htmlFor="topic" className="flex items-center gap-2">
-                        <Briefcase className="w-4 h-4" />
-                        咨询主题 <span className="text-red-500">*</span>
-                      </Label>
-                      <Select
-                        value={consultationForm.topic}
-                        onValueChange={(value) => setConsultationForm({ ...consultationForm, topic: value })}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="请选择咨询主题" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="市场准入">市场准入</SelectItem>
-                          <SelectItem value="认证服务">认证服务</SelectItem>
-                          <SelectItem value="品牌出海">品牌出海</SelectItem>
-                          <SelectItem value="数字化">数字化</SelectItem>
-                          <SelectItem value="其他">其他</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4" />
+                      <span>微信：PatrickWu1104</span>
                     </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="description" className="flex items-center gap-2">
-                        <MessageCircle className="w-4 h-4" />
-                        具体需求描述
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="请描述您的具体需求，以便我们为您安排合适的顾问..."
-                        value={consultationForm.description}
-                        onChange={(e) => setConsultationForm({ ...consultationForm, description: e.target.value })}
-                        className="mt-1 min-h-[120px]"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2 flex items-center justify-between">
-                    <div className="text-sm text-slate-500">
-                      <span className="text-red-500">*</span> 为必填项
-                    </div>
-                    <Button 
-                      onClick={handleConsultationSubmit} 
-                      disabled={isSubmittingConsultation}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Send className="w-4 h-4" />
-                      {isSubmittingConsultation ? '提交中...' : '提交预约'}
-                    </Button>
                   </div>
                 </div>
-              )}
-              <div className="mt-6 pt-6 border-t">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-3">聊商联盟海外服务部</h4>
-                    <div className="space-y-2 text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        <span>13346257732</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="w-4 h-4" />
-                        <span>微信：PatrickWu1104</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                    <h4 className="font-semibold text-amber-800 mb-2">专属权益</h4>
-                    <ul className="space-y-1 text-sm text-amber-700">
-                      <li>• 1对1深度咨询</li>
-                      <li>• 免费线下走访</li>
-                      <li>• 定制化解决方案</li>
-                      <li>• 会员专属优惠</li>
-                    </ul>
-                  </div>
+                <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                  <h4 className="font-semibold text-amber-800 mb-2">专属权益</h4>
+                  <ul className="space-y-1 text-sm text-amber-700">
+                    <li>• 1对1深度咨询</li>
+                    <li>• 免费线下走访</li>
+                    <li>• 定制化解决方案</li>
+                    <li>• 会员专属优惠</li>
+                  </ul>
                 </div>
+              </div>
+              <div className="mt-6 pt-6 border-t text-center">
+                <p className="text-slate-600">
+                  建议于 <span className="font-semibold text-red-600">7日内</span> 联系我们，获取详细解读
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -1057,7 +928,7 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                 <div>
                   <h3 className="font-bold text-lg">{company.name}</h3>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="text-sm bg-slate-100 px-2 py-1 rounded">{company.industry}</span>
+                    <span className="text-sm bg-slate-100 px-2 py-1 rounded">{getIndustryLabel(company.industry)}</span>
                     <span className="text-sm bg-slate-100 px-2 py-1 rounded">{company.location}</span>
                   </div>
                 </div>
