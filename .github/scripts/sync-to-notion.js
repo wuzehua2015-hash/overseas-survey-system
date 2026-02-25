@@ -192,6 +192,14 @@ async function submitToFullSurveyDatabase(submission) {
 
 // 提交到 Notion - 预约咨询数据库
 async function submitToConsultationDatabase(submission) {
+  // 检查数据库 ID 是否有效
+  if (!NOTION_CONSULTATION_DATABASE_ID || NOTION_CONSULTATION_DATABASE_ID.length < 30) {
+    console.warn(`⚠️ 跳过预约咨询同步: NOTION_CONSULTATION_DATABASE_ID 无效`);
+    console.warn(`   值: ${NOTION_CONSULTATION_DATABASE_ID || 'undefined'}`);
+    console.warn(`   请检查 GitHub Secrets 设置`);
+    return Promise.resolve({ skipped: true, reason: 'database_id_invalid' });
+  }
+  
   return new Promise((resolve, reject) => {
     const companyName = getCompanyName(submission);
     const contact = getContactInfo(submission);
