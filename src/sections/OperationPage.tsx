@@ -33,6 +33,10 @@ export function OperationPage({ data, onUpdate, onBack, onSaveProgress }: Operat
     totalSubSteps,
     goToSubStep,
     saveCurrentProgress,
+    isFirstSubStep,
+    isLastSubStep,
+    goToPrevSubStep,
+    goToNextSubStep,
   } = useSubStepNavigation({
     mainStep: 'operation',
     onSaveProgress,
@@ -365,6 +369,10 @@ export function OperationPage({ data, onUpdate, onBack, onSaveProgress }: Operat
         onStepChange={goToSubStep}
         onSaveProgress={saveCurrentProgress}
         stepTitles={stepTitles}
+        isFirstSubStep={isFirstSubStep}
+        isLastSubStep={isLastSubStep}
+        onFirstStepBack={goToPrevSubStep}
+        onLastStepNext={goToNextSubStep}
       >
         {renderSubStepContent()}
       </QuestionnaireContainer>

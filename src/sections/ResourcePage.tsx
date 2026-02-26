@@ -33,6 +33,10 @@ export function ResourcePage({ data, onUpdate, onBack, onSaveProgress }: Resourc
     totalSubSteps,
     goToSubStep,
     saveCurrentProgress,
+    isFirstSubStep,
+    isLastSubStep,
+    goToPrevSubStep,
+    goToNextSubStep,
   } = useSubStepNavigation({
     mainStep: 'resource',
     onSaveProgress,
@@ -302,6 +306,10 @@ export function ResourcePage({ data, onUpdate, onBack, onSaveProgress }: Resourc
         onStepChange={goToSubStep}
         onSaveProgress={saveCurrentProgress}
         stepTitles={stepTitles}
+        isFirstSubStep={isFirstSubStep}
+        isLastSubStep={isLastSubStep}
+        onFirstStepBack={goToPrevSubStep}
+        onLastStepNext={goToNextSubStep}
       >
         {renderSubStepContent()}
       </QuestionnaireContainer>

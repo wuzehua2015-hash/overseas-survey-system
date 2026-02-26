@@ -33,6 +33,10 @@ export function ProductPage({ data, onUpdate, onBack, onSaveProgress }: ProductP
     totalSubSteps,
     goToSubStep,
     saveCurrentProgress,
+    isFirstSubStep,
+    isLastSubStep,
+    goToPrevSubStep,
+    goToNextSubStep,
   } = useSubStepNavigation({
     mainStep: 'product',
     onSaveProgress,
@@ -338,6 +342,10 @@ export function ProductPage({ data, onUpdate, onBack, onSaveProgress }: ProductP
         onStepChange={goToSubStep}
         onSaveProgress={saveCurrentProgress}
         stepTitles={stepTitles}
+        isFirstSubStep={isFirstSubStep}
+        isLastSubStep={isLastSubStep}
+        onFirstStepBack={goToPrevSubStep}
+        onLastStepNext={goToNextSubStep}
       >
         {renderSubStepContent()}
       </QuestionnaireContainer>
