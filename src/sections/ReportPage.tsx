@@ -30,7 +30,6 @@ import type { ReportData } from '@/types/questionnaire';
 import { ConsultationForm } from '@/components/ConsultationForm';
 import { CoreSummary } from '@/components/CoreSummary';
 import { SocialProof } from '@/components/SocialProof';
-import { LimitedOffer } from '@/components/LimitedOffer';
 import { ShareReport } from '@/components/ShareReport';
 import { ScoreExplanationDialog } from '@/components/ScoreExplanationDialog';
 import { autoSubmitContactInfo } from '@/services/autoSubmit';
@@ -303,9 +302,6 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
             level={assessmentResult.level}
             dimensionScores={assessmentResult.dimensionScores}
           />
-
-          {/* 限时福利 */}
-          <LimitedOffer onConsultClick={() => document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' })} />
 
           {/* 报告主体 */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
