@@ -130,14 +130,14 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [expandedBenchmarks, setExpandedBenchmarks] = useState<Record<number, boolean>>({});
-  const [expandedMarkets, setExpandedMarkets] = useState<Record<number, boolean>>({});
+  const [expandedBenchmarks, setExpandedBenchmarks] = useState<Record<string, boolean>>({});
+  const [expandedMarkets, setExpandedMarkets] = useState<Record<string, boolean>>({});
 
-  const toggleBenchmark = (id: number) => {
+  const toggleBenchmark = (id: string) => {
     setExpandedBenchmarks(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const toggleMarket = (id: number) => {
+  const toggleMarket = (id: string) => {
     setExpandedMarkets(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -595,14 +595,15 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                 <CardContent>
                   <div className="space-y-4">
                     {matchedMarkets.map((market, i) => {
-                      const isMarketExpanded = expandedMarkets[i] || false;
+                      const marketId = String(i);
+                      const isMarketExpanded = expandedMarkets[marketId] || false;
                       return (
                         <div key={i} className={`p-4 rounded-lg border-2 ${
                           market.priority === 'high' ? 'border-emerald-200 bg-emerald-50' :
                           market.priority === 'medium' ? 'border-blue-200 bg-blue-50' :
                           'border-slate-200 bg-slate-50'
                         }`}>
-                          <Collapsible open={isMarketExpanded} onOpenChange={() => toggleMarket(i)}>
+                          <Collapsible open={isMarketExpanded} onOpenChange={() => toggleMarket(marketId)}>
                             <div className="flex items-start justify-between mb-3">
                               <div>
                                 <div className="flex items-center gap-2">
