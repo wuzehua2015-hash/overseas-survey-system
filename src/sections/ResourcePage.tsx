@@ -17,12 +17,11 @@ import { useSubStepNavigation } from '@/hooks/useSubStepNavigation';
 interface ResourcePageProps {
   data: ResourceAndPlan;
   onUpdate: (resource: Partial<ResourceAndPlan>) => void;
-  onNext: (step: QuestionnaireStep) => void;
   onBack: () => void;
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
 }
 
-export function ResourcePage({ data, onUpdate, onNext, onBack, onSaveProgress }: ResourcePageProps) {
+export function ResourcePage({ data, onUpdate, onBack, onSaveProgress }: ResourcePageProps) {
   const [localData, setLocalData] = useState<ResourceAndPlan>(data);
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export function ResourcePage({ data, onUpdate, onNext, onBack, onSaveProgress }:
   } = useSubStepNavigation({
     mainStep: 'resource',
     onSaveProgress,
-    onNextMainStep: onNext,
     onBackMainStep: onBack,
   });
 
@@ -51,10 +49,6 @@ export function ResourcePage({ data, onUpdate, onNext, onBack, onSaveProgress }:
       ? current.filter(i => i !== item)
       : [...current, item];
     updateField(field as keyof ResourceAndPlan, updated as any);
-  };
-
-  const handleNext = () => {
-    saveCurrentProgress();
   };
 
   const stepTitles = ['资金资源', '政策支持', '出海规划', '风险认知'];

@@ -5,7 +5,7 @@ import { STEP_CONFIG, getSubStepCount } from '@/types/subSteps';
 interface UseSubStepNavigationProps {
   mainStep: QuestionnaireStep;
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
-  onNextMainStep: (step: QuestionnaireStep) => void;
+  onNextMainStep?: (step: QuestionnaireStep) => void;
   onBackMainStep: () => void;
 }
 
@@ -89,7 +89,7 @@ export function useSubStepNavigation({
         currentSubStep: nextStep,
         timestamp: Date.now(),
       }));
-    } else if (isLastSubStep) {
+    } else if (isLastSubStep && onNextMainStep) {
       // 进入下一个主步骤
       const nextMainStep = getNextMainStep(mainStep);
       onSaveProgress(mainStep, mainProgress);

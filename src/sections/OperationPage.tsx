@@ -17,12 +17,11 @@ import { useSubStepNavigation } from '@/hooks/useSubStepNavigation';
 interface OperationPageProps {
   data: OperationCapability;
   onUpdate: (operation: Partial<OperationCapability>) => void;
-  onNext: (step: QuestionnaireStep) => void;
   onBack: () => void;
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
 }
 
-export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }: OperationPageProps) {
+export function OperationPage({ data, onUpdate, onBack, onSaveProgress }: OperationPageProps) {
   const [localData, setLocalData] = useState<OperationCapability>(data);
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }
   } = useSubStepNavigation({
     mainStep: 'operation',
     onSaveProgress,
-    onNextMainStep: onNext,
     onBackMainStep: onBack,
   });
 
@@ -65,10 +63,6 @@ export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }
       ? current.filter(b => b !== value)
       : [...current, value];
     updateField('brandProtection', updated);
-  };
-
-  const handleNext = () => {
-    saveCurrentProgress();
   };
 
   const stepTitles = ['数字化能力', '营销能力', '平台运营数据', '社媒运营数据', '品牌建设'];

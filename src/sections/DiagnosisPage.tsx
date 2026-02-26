@@ -17,12 +17,11 @@ import { useSubStepNavigation } from '@/hooks/useSubStepNavigation';
 interface DiagnosisPageProps {
   data: OverseasDiagnosis;
   onUpdate: (diagnosis: Partial<OverseasDiagnosis>) => void;
-  onNext: (step: QuestionnaireStep) => void;
   onBack: () => void;
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
 }
 
-export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }: DiagnosisPageProps) {
+export function DiagnosisPage({ data, onUpdate, onBack, onSaveProgress }: DiagnosisPageProps) {
   const [localData, setLocalData] = useState<OverseasDiagnosis>(data);
   const [showB2BDetail, setShowB2BDetail] = useState(data.channels.b2bPlatform);
   const [showSocialDetail, setShowSocialDetail] = useState(data.channels.socialMedia);
@@ -40,7 +39,6 @@ export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }
   } = useSubStepNavigation({
     mainStep: 'diagnosis',
     onSaveProgress,
-    onNextMainStep: onNext,
     onBackMainStep: onBack,
   });
 
@@ -76,10 +74,6 @@ export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }
       ? current.filter(i => i !== item)
       : [...current, item];
     updateChannels(key, updated);
-  };
-
-  const handleNext = () => {
-    saveCurrentProgress();
   };
 
   const stepTitles = ['业务现状', '市场覆盖', '渠道布局', '团队配置'];
