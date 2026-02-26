@@ -15,7 +15,6 @@ import {
   MessageCircle,
   Calendar,
   Star,
-  MapPin,
   Briefcase,
   Award,
   ChevronRight,
@@ -609,102 +608,140 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
 
             {/* 市场与服务 */}
             <TabsContent value="recommendations" className="space-y-6 mt-6">
-              {/* 目标市场推荐 */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    目标市场推荐
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {matchedMarkets.map((market, i) => {
-                      const marketId = String(i);
-                      const isMarketExpanded = expandedMarkets[marketId] || false;
-                      return (
-                        <div key={i} className={`p-4 rounded-lg border-2 ${
-                          market.priority === 'high' ? 'border-emerald-200 bg-emerald-50' :
-                          market.priority === 'medium' ? 'border-blue-200 bg-blue-50' :
-                          'border-slate-200 bg-slate-50'
+              {/* 目标市场推荐 - 卡片化展示 */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {matchedMarkets.map((market, i) => {
+                  const marketId = String(i);
+                  const isMarketExpanded = expandedMarkets[marketId] || false;
+                  // 区域图标映射
+                  const regionIcons: Record<string, string> = {
+                    '东南亚': '🌏',
+                    '中东': '🏜️',
+                    '欧洲': '🏰',
+                    '北美': '🗽',
+                    '南美': '🌎',
+                    '非洲': '🌍',
+                    '中亚': '🏔️',
+                    '东亚': '🏯',
+                    '大洋洲': '🦘',
+                  };
+                  const regionIcon = regionIcons[market.region] || '🌐';
+                  
+                  return (
+                    <Card key={i} className={`overflow-hidden hover:shadow-lg transition-shadow ${
+                      market.priority === 'high' ? 'border-emerald-200' :
+                      market.priority === 'medium' ? 'border-blue-200' :
+                      'border-slate-200'
+                    }`}>
+                      {/* 卡片头部 */}
+                      <div className={`p-4 border-b ${
+                        market.priority === 'high' ? 'bg-gradient-to-br from-emerald-50 to-teal-50' :
+                        market.priority === 'medium' ? 'bg-gradient-to-br from-blue-50 to-indigo-50' :
+                        'bg-gradient-to-br from-slate-50 to-gray-50'
+                      }`}>
+                        <div className="flex items-start justify-between mb-3">
+                          {/* 区域图标 */}
+                          <div className="text-4xl">{regionIcon}</div>
+                          {/* 匹配度 */}
+                          <div className="text-right">
+                            <Badge className={`${
+                              market.fitScore && market.fitScore >= 85 ? 'bg-emerald-500' :
+                              market.fitScore && market.fitScore >= 70 ? 'bg-blue-500' :
+                              'bg-slate-500'
+                            } text-white`}>
+                              {market.fitScore}% 匹配
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        {/* 区域名称 */}
+                        <h3 className="font-bold text-lg text-slate-900 mb-2">{market.region}</h3>
+                        
+                        {/* 优先级标签 */}
+                        <Badge variant="outline" className={`text-xs ${
+                          market.priority === 'high' ? 'border-emerald-300 text-emerald-700 bg-emerald-50' :
+                          market.priority === 'medium' ? 'border-blue-300 text-blue-700 bg-blue-50' :
+                          'border-slate-300 text-slate-700 bg-slate-50'
                         }`}>
-                          <Collapsible open={isMarketExpanded} onOpenChange={() => toggleMarket(marketId)}>
-                            <div className="flex items-start justify-between mb-3">
+                          {market.priority === 'high' ? '⭐ 优先推荐' :
+                           market.priority === 'medium' ? '👍 推荐' : '💡 备选'}
+                        </Badge>
+                      </div>
+                      
+                      {/* 卡片内容 */}
+                      <CardContent className="p-4">
+                        {/* 国家标签 */}
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {market.countries?.slice(0, 4).map(c => (
+                            <span key={c} className="text-xs bg-slate-100 px-2 py-1 rounded-full text-slate-600">
+                              {c}
+                            </span>
+                          ))}
+                          {market.countries && market.countries.length > 4 && (
+                            <span className="text-xs text-slate-400">+{market.countries.length - 4}</span>
+                          )}
+                        </div>
+                        
+                        {/* 描述 */}
+                        <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                          {generateMarketDescription(market)}
+                        </p>
+                        
+                        {/* 关键数据 */}
+                        <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
+                          <div className="bg-slate-50 p-2 rounded">
+                            <span className="text-slate-500 block">预计投入</span>
+                            <span className="font-medium text-slate-700">{market.estimatedInvestment}</span>
+                          </div>
+                          <div className="bg-slate-50 p-2 rounded">
+                            <span className="text-slate-500 block">时间周期</span>
+                            <span className="font-medium text-slate-700">{market.timeline}</span>
+                          </div>
+                        </div>
+                        
+                        {/* 折叠详情 */}
+                        <Collapsible open={isMarketExpanded} onOpenChange={() => toggleMarket(marketId)}>
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="w-full flex items-center justify-center gap-1 text-slate-500 hover:text-slate-700">
+                              {isMarketExpanded ? (
+                                <>
+                                  <ChevronUp className="w-4 h-4" />
+                                  收起
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="w-4 h-4" />
+                                  查看详情
+                                </>
+                              )}
+                            </Button>
+                          </CollapsibleTrigger>
+                          
+                          <CollapsibleContent className="space-y-3 mt-3 pt-3 border-t">
+                            <div>
+                              <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">进入策略</h4>
+                              <p className="text-sm text-slate-700">{market.entryStrategy}</p>
+                            </div>
+                            
+                            {market.keyRequirements && market.keyRequirements.length > 0 && (
                               <div>
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-bold text-lg">{market.region}</h4>
-                                  <Badge className={
-                                    market.priority === 'high' ? 'bg-emerald-500' :
-                                    market.priority === 'medium' ? 'bg-blue-500' :
-                                    'bg-slate-500'
-                                  }>
-                                    {market.priority === 'high' ? '优先推荐' :
-                                     market.priority === 'medium' ? '推荐' : '备选'}
-                                  </Badge>
-                                </div>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                  {market.countries?.map(c => (
-                                    <span key={c} className="text-sm bg-white px-2 py-1 rounded">{c}</span>
+                                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">关键要求</h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {market.keyRequirements.map((req, idx) => (
+                                    <span key={idx} className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-200">
+                                      {req}
+                                    </span>
                                   ))}
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm text-slate-500">匹配度</div>
-                                <div className="text-2xl font-bold text-blue-600">{market.fitScore}%</div>
-                              </div>
-                            </div>
-                            <p className="text-sm text-slate-600 mb-3">{generateMarketDescription(market)}</p>
-                            
-                            <CollapsibleTrigger asChild>
-                              <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-2 mb-3">
-                                {isMarketExpanded ? (
-                                  <>
-                                    <ChevronUp className="w-4 h-4" />
-                                    收起详情
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="w-4 h-4" />
-                                    展开详情
-                                  </>
-                                )}
-                              </Button>
-                            </CollapsibleTrigger>
-                            
-                            <CollapsibleContent className="space-y-3">
-                              <div className="grid md:grid-cols-3 gap-4 text-sm">
-                                <div>
-                                  <span className="text-slate-500">进入策略：</span>
-                                  <span className="text-slate-700">{market.entryStrategy}</span>
-                                </div>
-                                <div>
-                                  <span className="text-slate-500">预计投入：</span>
-                                  <span className="text-slate-700">{market.estimatedInvestment}</span>
-                                </div>
-                                <div>
-                                  <span className="text-slate-500">时间周期：</span>
-                                  <span className="text-slate-700">{market.timeline}</span>
-                                </div>
-                              </div>
-                              
-                              {market.keyRequirements && market.keyRequirements.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-slate-200">
-                                  <span className="text-sm text-slate-500">关键要求：</span>
-                                  <div className="flex flex-wrap gap-2 mt-1">
-                                    {market.keyRequirements.map((req, idx) => (
-                                      <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">{req}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
+                            )}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
 
               {/* 推荐服务 */}
               <Card>
