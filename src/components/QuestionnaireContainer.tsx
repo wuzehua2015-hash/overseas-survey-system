@@ -8,8 +8,12 @@ interface QuestionnaireContainerProps {
   currentStep: number;
   onStepChange: (step: number) => void;
   onSaveProgress?: () => void;
+  onFirstStepBack?: () => void;  // 第一个子步骤时点击上一步
+  onLastStepNext?: () => void;   // 最后一个子步骤时点击下一步
   children: React.ReactNode;
   stepTitles: string[];
+  isFirstSubStep?: boolean;  // 是否是第一个子步骤
+  isLastSubStep?: boolean;   // 是否是最后一个子步骤
 }
 
 export function QuestionnaireContainer({
@@ -17,8 +21,12 @@ export function QuestionnaireContainer({
   currentStep,
   onStepChange,
   onSaveProgress,
+  onFirstStepBack,
+  onLastStepNext,
   children,
   stepTitles,
+  isFirstSubStep = false,
+  isLastSubStep = false,
 }: QuestionnaireContainerProps) {
   const [showSaveHint, setShowSaveHint] = useState(false);
   const [contentAnimation, setContentAnimation] = useState('');
@@ -52,14 +60,25 @@ export function QuestionnaireContainer({
   const handlePrevious = () => {
     if (currentStep > 0) {
       onStepChange(currentStep - 1);
+    } else if (isFirstSubStep && onFirstStepBack) {
+      // 第一个子步骤时，返回上一个主步骤
+      onFirstStepBack();
     }
   };
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       onStepChange(currentStep + 1);
+    } else if (isLastSubStep && onLastStepNext) {
+      // 最后一个子步骤时，进入下一个主步骤
+      onLastStepNext();
     }
   };
+
+  // 判断是否显示上一步按钮（不是第一个子步骤，或者有回调）
+  const showPreviousButton = currentStep > 0 || (isFirstSubStep && onFirstStepBack);
+  // 判断是否显示下一步按钮（不是最后一个子步骤，或者有回调）
+  const showNextButton = currentStep < totalSteps - 1 || (isLastSubStep && onLastStepNext);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -128,15 +147,18 @@ export function QuestionnaireContainer({
 
       {/* 导航按钮 */}
       <div className="flex justify-between items-center">
-        <Button
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-          className="flex items-center gap-2"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          上一步
-        </Button>
+        {showPreviousButton ? (
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            上一步
+          </Button>
+        ) : (
+          <div />  // 占位符保持布局
+        )}
 
         <div className="flex gap-3">
           {onSaveProgress && (
@@ -150,14 +172,15 @@ export function QuestionnaireContainer({
             </Button>
           )}
 
-          <Button
-            onClick={handleNext}
-            disabled={currentStep === totalSteps - 1}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-          >
-            下一步
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+          {showNextButton && (
+            <Button
+              onClick={handleNext}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              下一步
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

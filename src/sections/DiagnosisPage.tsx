@@ -36,6 +36,10 @@ export function DiagnosisPage({ data, onUpdate, onBack, onSaveProgress }: Diagno
     totalSubSteps,
     goToSubStep,
     saveCurrentProgress,
+    isFirstSubStep,
+    isLastSubStep,
+    goToPrevSubStep,
+    goToNextSubStep,
   } = useSubStepNavigation({
     mainStep: 'diagnosis',
     onSaveProgress,
@@ -428,6 +432,10 @@ export function DiagnosisPage({ data, onUpdate, onBack, onSaveProgress }: Diagno
         onStepChange={goToSubStep}
         onSaveProgress={saveCurrentProgress}
         stepTitles={stepTitles}
+        isFirstSubStep={isFirstSubStep}
+        isLastSubStep={isLastSubStep}
+        onFirstStepBack={goToPrevSubStep}
+        onLastStepNext={goToNextSubStep}
       >
         {renderSubStepContent()}
       </QuestionnaireContainer>
