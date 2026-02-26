@@ -32,6 +32,7 @@ import { CoreSummary } from '@/components/CoreSummary';
 import { SocialProof } from '@/components/SocialProof';
 import { LimitedOffer } from '@/components/LimitedOffer';
 import { ShareReport } from '@/components/ShareReport';
+import { ScoreExplanationDialog } from '@/components/ScoreExplanationDialog';
 import { autoSubmitContactInfo } from '@/services/autoSubmit';
 import { industryOptions } from '@/types/questionnaire';
 import { findBenchmarkCompanies, generateMatchDescription } from '@/utils/benchmarkMatcher';
@@ -320,11 +321,12 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
             <TabsContent value="overview" className="space-y-6 mt-6">
               {/* 五维能力雷达图 */}
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="w-5 h-5" />
                     五维能力评估
                   </CardTitle>
+                  <ScoreExplanationDialog />
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-2 gap-8">
                   <div>
