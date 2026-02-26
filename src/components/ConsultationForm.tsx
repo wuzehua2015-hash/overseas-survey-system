@@ -252,6 +252,16 @@ export function ConsultationForm({
 
       <Card className="border-t-0 rounded-t-none shadow-xl">
         <CardContent className="p-6">
+          {/* 预填提示 */}
+          {(companyName || contactName || industry) && (
+            <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-2 text-blue-700">
+                <Sparkles className="w-4 h-4" />
+                <span className="text-sm font-medium">已根据您的测评结果预填，可直接提交或修改</span>
+              </div>
+            </div>
+          )}
+
           {/* 服务优势 */}
           {!hasAutoSubmitted && (
             <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
