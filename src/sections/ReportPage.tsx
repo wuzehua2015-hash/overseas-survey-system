@@ -503,83 +503,108 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
 
             {/* 标杆对标 */}
             <TabsContent value="benchmark" className="space-y-6 mt-6">
-              {matchedBenchmarks.map((match) => {
-                const company = match.company;
-                const isExpanded = expandedBenchmarks[company.id] || false;
-                return (
-                  <Card key={company.id}>
-                    <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="flex items-center gap-2 text-xl">
-                            <Star className="w-5 h-5 text-amber-500" />
-                            {company.name}
-                          </CardTitle>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="secondary">{getIndustryLabel(company.industry)}</Badge>
-                            <Badge variant="secondary">{company.location}</Badge>
-                            <Badge variant="secondary">{company.annualRevenue}</Badge>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {matchedBenchmarks.map((match, index) => {
+                  const company = match.company;
+                  const isExpanded = expandedBenchmarks[company.id] || false;
+                  return (
+                    <Card key={company.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {/* 卡片头部 - 渐变背景 */}
+                      <div className={`bg-gradient-to-br ${
+                        index === 0 ? 'from-amber-50 to-orange-50 border-amber-200' :
+                        index === 1 ? 'from-slate-50 to-blue-50 border-blue-200' :
+                        'from-slate-50 to-gray-50 border-slate-200'
+                      } p-4 border-b`}>
+                        <div className="flex items-start justify-between mb-3">
+                          {/* Logo占位符 */}
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold ${
+                            index === 0 ? 'bg-amber-100 text-amber-700' :
+                            index === 1 ? 'bg-blue-100 text-blue-700' :
+                            'bg-slate-100 text-slate-700'
+                          }`}>
+                            {company.name.charAt(0)}
                           </div>
-                          <p className="text-sm text-slate-600 mt-2">{generateMatchDescription(match)}</p>
+                          {/* 匹配度徽章 */}
+                          <div className="text-right">
+                            <Badge className={`${
+                              match.score >= 90 ? 'bg-emerald-500' :
+                              match.score >= 80 ? 'bg-blue-500' :
+                              'bg-slate-500'
+                            } text-white`}>
+                              {match.score}% 匹配
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm text-slate-500">对标指数</div>
-                          <div className="text-2xl font-bold text-blue-600">{match.score}%</div>
+                        
+                        {/* 企业名称 */}
+                        <h3 className="font-bold text-lg text-slate-900 mb-2">{company.name}</h3>
+                        
+                        {/* 标签 */}
+                        <div className="flex flex-wrap gap-1.5">
+                          <Badge variant="outline" className="text-xs">{getIndustryLabel(company.industry)}</Badge>
+                          <Badge variant="outline" className="text-xs">{company.location}</Badge>
+                          <Badge variant="outline" className="text-xs">{company.annualRevenue}</Badge>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                      <Collapsible open={isExpanded} onOpenChange={() => toggleBenchmark(company.id)}>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold text-slate-900 mb-2">核心业务</h4>
-                            <p className="text-slate-600">{company.coreCompetency}</p>
-                          </div>
+                      
+                      {/* 卡片内容 */}
+                      <CardContent className="p-4">
+                        {/* 匹配原因 */}
+                        <p className="text-sm text-slate-600 mb-4 line-clamp-2">{generateMatchDescription(match)}</p>
+                        
+                        {/* 核心业务 */}
+                        <div className="mb-4">
+                          <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">核心业务</h4>
+                          <p className="text-sm text-slate-700 line-clamp-2">{company.coreCompetency}</p>
+                        </div>
+                        
+                        {/* 折叠内容 */}
+                        <Collapsible open={isExpanded} onOpenChange={() => toggleBenchmark(company.id)}>
                           <CollapsibleTrigger asChild>
-                            <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                            <Button variant="ghost" size="sm" className="w-full flex items-center justify-center gap-1 text-slate-500 hover:text-slate-700">
                               {isExpanded ? (
                                 <>
                                   <ChevronUp className="w-4 h-4" />
-                                  收起详情
+                                  收起
                                 </>
                               ) : (
                                 <>
                                   <ChevronDown className="w-4 h-4" />
-                                  展开详情
+                                  查看详情
                                 </>
                               )}
                             </Button>
                           </CollapsibleTrigger>
-                          <CollapsibleContent className="space-y-4">
+                          <CollapsibleContent className="space-y-4 mt-4 pt-4 border-t">
                             <div>
-                              <h4 className="font-semibold text-slate-900 mb-2">出海成就</h4>
-                              <ul className="space-y-1">
+                              <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">出海成就</h4>
+                              <ul className="space-y-2">
                                 {company.keyMilestones.slice(0, 3).map((m, i) => (
                                   <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
                                     <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                                    {m}
+                                    <span className="line-clamp-2">{m}</span>
                                   </li>
                                 ))}
                               </ul>
                             </div>
                             <div>
-                              <h4 className="font-semibold text-slate-900 mb-2">可借鉴点</h4>
-                              <ul className="space-y-1">
+                              <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">可借鉴点</h4>
+                              <ul className="space-y-2">
                                 {company.learnablePoints.map((p, i) => (
                                   <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
                                     <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                                    {p}
+                                    <span className="line-clamp-2">{p}</span>
                                   </li>
                                 ))}
                               </ul>
                             </div>
                           </CollapsibleContent>
-                        </div>
-                      </Collapsible>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                        </Collapsible>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </TabsContent>
 
             {/* 市场与服务 */}
