@@ -78,10 +78,7 @@ export function WelcomePage({ onStart, savedProgress, onContinue }: WelcomePageP
               聊商联盟海外服务部 · 标准化评估体系
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
-              企业出海成熟度
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                智能评估系统
-              </span>
+              企业出海成熟度测评
             </h1>
             <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
               基于聊商联盟海外服务部标准化体系，通过五维评估模型量化诊断企业出海准备度，
