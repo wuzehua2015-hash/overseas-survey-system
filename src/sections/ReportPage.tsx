@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Download, 
   RotateCcw, 
@@ -22,7 +23,9 @@ import {
   Lightbulb,
   Zap,
   Shield,
-  Wallet
+  Wallet,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import type { ReportData } from '@/types/questionnaire';
 import { ConsultationForm } from '@/components/ConsultationForm';
@@ -127,6 +130,16 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [expandedBenchmarks, setExpandedBenchmarks] = useState<Record<number, boolean>>({});
+  const [expandedMarkets, setExpandedMarkets] = useState<Record<number, boolean>>({});
+
+  const toggleBenchmark = (id: number) => {
+    setExpandedBenchmarks(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleMarket = (id: number) => {
+    setExpandedMarkets(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const { 
     companyProfile,
@@ -492,6 +505,7 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
             <TabsContent value="benchmark" className="space-y-6 mt-6">
               {matchedBenchmarks.map((match) => {
                 const company = match.company;
+                const isExpanded = expandedBenchmarks[company.id] || false;
                 return (
                   <Card key={company.id}>
                     <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50">
@@ -514,33 +528,54 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-6">
-                      <div>
-                        <h4 className="font-semibold text-slate-900 mb-2">核心业务</h4>
-                        <p className="text-slate-600">{company.coreCompetency}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900 mb-2">出海成就</h4>
-                        <ul className="space-y-1">
-                          {company.keyMilestones.slice(0, 3).map((m, i) => (
-                            <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                              {m}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900 mb-2">可借鉴点</h4>
-                        <ul className="space-y-1">
-                          {company.learnablePoints.map((p, i) => (
-                            <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
-                              <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                              {p}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                    <CardContent className="pt-4">
+                      <Collapsible open={isExpanded} onOpenChange={() => toggleBenchmark(company.id)}>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold text-slate-900 mb-2">核心业务</h4>
+                            <p className="text-slate-600">{company.coreCompetency}</p>
+                          </div>
+                          <CollapsibleTrigger asChild>
+                            <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="w-4 h-4" />
+                                  收起详情
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="w-4 h-4" />
+                                  展开详情
+                                </>
+                              )}
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="space-y-4">
+                            <div>
+                              <h4 className="font-semibold text-slate-900 mb-2">出海成就</h4>
+                              <ul className="space-y-1">
+                                {company.keyMilestones.slice(0, 3).map((m, i) => (
+                                  <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                                    <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                    {m}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-slate-900 mb-2">可借鉴点</h4>
+                              <ul className="space-y-1">
+                                {company.learnablePoints.map((p, i) => (
+                                  <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                                    <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                                    {p}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
                     </CardContent>
                   </Card>
                 );
@@ -559,65 +594,88 @@ export function ReportPage({ reportData, onReset }: ReportPageProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {matchedMarkets.map((market, i) => (
-                      <div key={i} className={`p-4 rounded-lg border-2 ${
-                        market.priority === 'high' ? 'border-emerald-200 bg-emerald-50' :
-                        market.priority === 'medium' ? 'border-blue-200 bg-blue-50' :
-                        'border-slate-200 bg-slate-50'
-                      }`}>
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-lg">{market.region}</h4>
-                              <Badge className={
-                                market.priority === 'high' ? 'bg-emerald-500' :
-                                market.priority === 'medium' ? 'bg-blue-500' :
-                                'bg-slate-500'
-                              }>
-                                {market.priority === 'high' ? '优先推荐' :
-                                 market.priority === 'medium' ? '推荐' : '备选'}
-                              </Badge>
+                    {matchedMarkets.map((market, i) => {
+                      const isMarketExpanded = expandedMarkets[i] || false;
+                      return (
+                        <div key={i} className={`p-4 rounded-lg border-2 ${
+                          market.priority === 'high' ? 'border-emerald-200 bg-emerald-50' :
+                          market.priority === 'medium' ? 'border-blue-200 bg-blue-50' :
+                          'border-slate-200 bg-slate-50'
+                        }`}>
+                          <Collapsible open={isMarketExpanded} onOpenChange={() => toggleMarket(i)}>
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-lg">{market.region}</h4>
+                                  <Badge className={
+                                    market.priority === 'high' ? 'bg-emerald-500' :
+                                    market.priority === 'medium' ? 'bg-blue-500' :
+                                    'bg-slate-500'
+                                  }>
+                                    {market.priority === 'high' ? '优先推荐' :
+                                     market.priority === 'medium' ? '推荐' : '备选'}
+                                  </Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {market.countries?.map(c => (
+                                    <span key={c} className="text-sm bg-white px-2 py-1 rounded">{c}</span>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm text-slate-500">匹配度</div>
+                                <div className="text-2xl font-bold text-blue-600">{market.fitScore}%</div>
+                              </div>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {market.countries?.map(c => (
-                                <span key={c} className="text-sm bg-white px-2 py-1 rounded">{c}</span>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm text-slate-500">匹配度</div>
-                            <div className="text-2xl font-bold text-blue-600">{market.fitScore}%</div>
-                          </div>
+                            <p className="text-sm text-slate-600 mb-3">{generateMarketDescription(market)}</p>
+                            
+                            <CollapsibleTrigger asChild>
+                              <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-2 mb-3">
+                                {isMarketExpanded ? (
+                                  <>
+                                    <ChevronUp className="w-4 h-4" />
+                                    收起详情
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="w-4 h-4" />
+                                    展开详情
+                                  </>
+                                )}
+                              </Button>
+                            </CollapsibleTrigger>
+                            
+                            <CollapsibleContent className="space-y-3">
+                              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <span className="text-slate-500">进入策略：</span>
+                                  <span className="text-slate-700">{market.entryStrategy}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-500">预计投入：</span>
+                                  <span className="text-slate-700">{market.estimatedInvestment}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-500">时间周期：</span>
+                                  <span className="text-slate-700">{market.timeline}</span>
+                                </div>
+                              </div>
+                              
+                              {market.keyRequirements && market.keyRequirements.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-slate-200">
+                                  <span className="text-sm text-slate-500">关键要求：</span>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    {market.keyRequirements.map((req, idx) => (
+                                      <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">{req}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </CollapsibleContent>
+                          </Collapsible>
                         </div>
-                        <p className="text-sm text-slate-600 mb-3">{generateMarketDescription(market)}</p>
-                        
-                        <div className="grid md:grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <span className="text-slate-500">进入策略：</span>
-                            <span className="text-slate-700">{market.entryStrategy}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-500">预计投入：</span>
-                            <span className="text-slate-700">{market.estimatedInvestment}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-500">时间周期：</span>
-                            <span className="text-slate-700">{market.timeline}</span>
-                          </div>
-                        </div>
-                        
-                        {market.keyRequirements && market.keyRequirements.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-slate-200">
-                            <span className="text-sm text-slate-500">关键要求：</span>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              {market.keyRequirements.map((req, idx) => (
-                                <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">{req}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
