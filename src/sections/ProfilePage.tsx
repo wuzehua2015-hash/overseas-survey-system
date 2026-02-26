@@ -233,11 +233,12 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                       <SelectValue placeholder="请选择" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="<500">500万以下</SelectItem>
-                      <SelectItem value="500-1000">500-1000万</SelectItem>
-                      <SelectItem value="1000-3000">1000-3000万</SelectItem>
-                      <SelectItem value="3000-5000">3000-5000万</SelectItem>
-                      <SelectItem value=">5000">5000万以上</SelectItem>
+                      <SelectItem value="startup">初创期 (&lt;100万)</SelectItem>
+                      <SelectItem value="early">起步期 (100-500万)</SelectItem>
+                      <SelectItem value="growth">成长期 (500-2000万)</SelectItem>
+                      <SelectItem value="expansion">扩张期 (2000万-1亿)</SelectItem>
+                      <SelectItem value="mature">成熟期 (1-10亿)</SelectItem>
+                      <SelectItem value="leading">领军期 (10亿以上)</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.annualRevenue && <p className="text-red-500 text-sm">{errors.annualRevenue}</p>}
@@ -253,10 +254,11 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                       <SelectValue placeholder="请选择" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="<50">50人以下</SelectItem>
-                      <SelectItem value="50-100">50-100人</SelectItem>
-                      <SelectItem value="100-500">100-500人</SelectItem>
-                      <SelectItem value=">500">500人以上</SelectItem>
+                      <SelectItem value="micro">微型企业 (1-10人)</SelectItem>
+                      <SelectItem value="small">小型企业 (11-50人)</SelectItem>
+                      <SelectItem value="medium">中型企业 (51-200人)</SelectItem>
+                      <SelectItem value="large">大型企业 (201-500人)</SelectItem>
+                      <SelectItem value="xlarge">超大型企业 (500人以上)</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.employeeCount && <p className="text-red-500 text-sm">{errors.employeeCount}</p>}
