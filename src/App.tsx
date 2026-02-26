@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useQuestionnaire } from '@/hooks/useQuestionnaire';
 import { WelcomePage } from '@/sections/WelcomePage';
 import { ProfilePage } from '@/sections/ProfilePage';
@@ -8,6 +9,9 @@ import { ResourcePage } from '@/sections/ResourcePage';
 import { ReportPage } from '@/sections/ReportPage';
 import type { QuestionnaireStep } from '@/types/questionnaire';
 import './App.css';
+
+// 步骤顺序
+const STEP_ORDER: QuestionnaireStep[] = ['welcome', 'profile', 'diagnosis', 'product', 'operation', 'resource', 'report'];
 
 function App() {
   const {
@@ -24,6 +28,32 @@ function App() {
     generateReportData,
     resetQuestionnaire,
   } = useQuestionnaire();
+
+  const [animationClass, setAnimationClass] = useState('');
+  const [prevStep, setPrevStep] = useState<QuestionnaireStep>(currentStep);
+
+  // 监听步骤变化，添加动画
+  useEffect(() => {
+    if (currentStep !== prevStep) {
+      const currentIndex = STEP_ORDER.indexOf(currentStep);
+      const prevIndex = STEP_ORDER.indexOf(prevStep);
+      
+      if (currentIndex > prevIndex) {
+        setAnimationClass('page-enter-right');
+      } else {
+        setAnimationClass('page-enter-left');
+      }
+      
+      setPrevStep(currentStep);
+      
+      // 清除动画类
+      const timer = setTimeout(() => {
+        setAnimationClass('');
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, prevStep]);
 
   const handleStart = (step: QuestionnaireStep) => {
     setCurrentStep(step);
@@ -82,6 +112,7 @@ function App() {
             data={data.profile}
             onUpdate={updateProfile}
             onNext={handleNext}
+            onBack={handleBack}
             onSaveProgress={saveProgress}
           />
         );
@@ -151,7 +182,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {renderCurrentStep()}
+      <div className={animationClass}>
+        {renderCurrentStep()}
+      </div>
     </div>
   );
 }

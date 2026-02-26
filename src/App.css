@@ -84,6 +84,129 @@ button:active {
   animation: fade-in 0.3s ease-out;
 }
 
+/* Page transition animations */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+.page-enter-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.page-enter-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+.page-exit-right {
+  animation: slide-out-right 0.3s ease-out;
+}
+
+.page-exit-left {
+  animation: slide-out-left 0.3s ease-out;
+}
+
+/* Sub-step content animation */
+@keyframes substep-enter {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.substep-content {
+  animation: substep-enter 0.25s ease-out;
+}
+
+@keyframes substep-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes substep-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.substep-enter-right {
+  animation: substep-enter-right 0.25s ease-out;
+}
+
+.substep-enter-left {
+  animation: substep-enter-left 0.25s ease-out;
+}
+
+/* Animate fade in */
+@keyframes animate-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: animate-fade-in 0.3s ease-out;
+}
+
 /* Slide in animation */
 @keyframes slide-in {
   from {
