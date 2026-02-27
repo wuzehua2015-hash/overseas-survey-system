@@ -18,22 +18,29 @@
 - ✅ 在 sync-to-notion.js 中添加 industryMap 中文映射表
 - ✅ 修复提交到 Notion 时的行业名称转换
 
-**问题根源:**
-- sync-to-notion.js 中 `contact.industry` 直接提交到 Notion，未转换为中文
-- 导致 Notion 中显示英文（如 building）
+### Task 2: 修复评分算法问题 ✅
+- **状态**: ✅ 已完成
+- **完成时间**: 2026-02-27
+- **耗时**: 1小时
 
-**修复方案:**
-- 添加 industryMap 映射表（15个行业）
-- 在构建 Notion properties 时转换：`industryMap[contact.industry] || contact.industry`
+**What was done:**
+- ✅ 检查所有评分函数
+- ✅ 降低基础分（50→30, 40→25, 30→20）
+- ✅ 添加数据完整性检查
+- ✅ 未填写信息的维度给予较低基础分
+- ✅ 优化各维度权重分配
+
+**修改详情:**
+| 函数 | 原基础分 | 新基础分 | 主要改进 |
+|------|----------|----------|----------|
+| calculateFoundationScore | 50 | 30 | 添加基本信息检查 |
+| calculateProductScore | 40 | 25 | 检查产品信息填写 |
+| calculateOperationScore | 30 | 20 | 检查运营信息填写 |
+| calculateResourceScore | 30 | 20 | 检查资源信息填写 |
+| calculatePotentialScore | 40 | 25 | 检查发展信息填写 |
 
 **Testing:**
 - ✅ npm run build 构建成功
-- ✅ 脚本语法检查通过
-
-### Task 2: 修复评分算法问题 ⏳
-- **状态**: ⏳ 待开始
-- **问题**: 只填基本信息就显示"国际领航者"
-- **原因**: 评分算法未考虑数据完整性
 
 ### Task 3: 优化服务推荐算法 ⏳
 - **状态**: ⏳ 待开始
@@ -47,6 +54,5 @@
 - `task-v3.1-bugfix.json` - Auto Coding Agent 任务定义
 
 ## 下一步行动
-1. 执行 Task 2: 修复评分算法问题
-2. 执行 Task 3: 优化服务推荐算法
-3. 执行 Task 4: 全面代码审查
+1. 执行 Task 3: 优化服务推荐算法
+2. 执行 Task 4: 全面代码审查

@@ -55,9 +55,11 @@
         "完整填写后得分是否合理？",
         "企业等级判断是否准确？"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "high",
-      "estimatedTime": "1.5小时"
+      "estimatedTime": "1.5小时",
+      "completedAt": "2026-02-27",
+      "notes": "已完成，降低基础分，添加数据完整性检查"
     },
     {
       "id": 3,

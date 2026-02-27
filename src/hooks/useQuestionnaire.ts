@@ -390,66 +390,94 @@ function calculateFoundationScore(
   profile: CompanyProfile,
   diagnosis: OverseasDiagnosis
 ): number {
-  let score = 50; // 基础分
+  // 检查数据完整性
+  const hasBasicInfo = profile.name && profile.establishedYear && profile.industry;
+  const hasTeamInfo = diagnosis.teamConfig.hasDedicatedTeam !== undefined;
   
-  // 企业规模
-  if (profile.annualRevenue === '>5000') score += 10;
-  else if (profile.annualRevenue === '3000-5000') score += 7;
-  else if (profile.annualRevenue === '1000-3000') score += 5;
-  else if (profile.annualRevenue === '500-1000') score += 3;
-  
-  // 团队配置
-  if (diagnosis.teamConfig.hasDedicatedTeam) {
-    if (diagnosis.teamConfig.teamSize === '>50') score += 10;
-    else if (diagnosis.teamConfig.teamSize === '20-50') score += 7;
-    else if (diagnosis.teamConfig.teamSize === '5-20') score += 5;
-    else score += 3;
+  // 如果基本信息不完整，给予较低基础分
+  if (!hasBasicInfo) {
+    return 30;
   }
   
-  // 外语能力
-  if (diagnosis.teamConfig.foreignLanguageCapability === 'excellent') score += 8;
-  else if (diagnosis.teamConfig.foreignLanguageCapability === 'good') score += 5;
-  else if (diagnosis.teamConfig.foreignLanguageCapability === 'basic') score += 2;
+  let score = 30; // 降低基础分
   
-  // 数字化水平
-  if (profile.rAndDStaffRatio === '>30%') score += 5;
-  else if (profile.rAndDStaffRatio === '10-30%') score += 3;
+  // 企业规模（最高15分）
+  if (profile.annualRevenue === '>5000') score += 15;
+  else if (profile.annualRevenue === '3000-5000') score += 12;
+  else if (profile.annualRevenue === '1000-3000') score += 9;
+  else if (profile.annualRevenue === '500-1000') score += 6;
+  else if (profile.annualRevenue) score += 3;
+  
+  // 团队配置（最高20分）- 必须填写才有分
+  if (hasTeamInfo && diagnosis.teamConfig.hasDedicatedTeam) {
+    if (diagnosis.teamConfig.teamSize === '>50') score += 20;
+    else if (diagnosis.teamConfig.teamSize === '20-50') score += 15;
+    else if (diagnosis.teamConfig.teamSize === '5-20') score += 10;
+    else if (diagnosis.teamConfig.teamSize) score += 5;
+    
+    // 外语能力（最高10分）
+    if (diagnosis.teamConfig.foreignLanguageCapability === 'excellent') score += 10;
+    else if (diagnosis.teamConfig.foreignLanguageCapability === 'good') score += 6;
+    else if (diagnosis.teamConfig.foreignLanguageCapability === 'basic') score += 3;
+  }
+  
+  // 数字化水平（最高10分）
+  if (profile.rAndDStaffRatio === '>30%') score += 10;
+  else if (profile.rAndDStaffRatio === '10-30%') score += 6;
+  else if (profile.rAndDStaffRatio) score += 3;
+  
+  // 企业性质加分（最高5分）
+  if (profile.companyNature === 'listed' || profile.companyNature === 'state') score += 5;
+  else if (profile.companyNature) score += 2;
   
   return Math.min(100, score);
 }
 
 // 计算产品竞争力得分
 function calculateProductScore(product: ProductCompetitiveness): number {
-  let score = 40;
+  // 检查是否有填写产品信息
+  const hasProductInfo = product.pricePositioning || product.customizationCapability || product.certifications.length > 0;
   
-  // 认证情况
-  score += Math.min(product.certifications.length * 3, 15);
-  
-  // 价格定位
-  if (product.pricePositioning === 'premium') score += 10;
-  else if (product.pricePositioning === 'mid-high') score += 7;
-  else if (product.pricePositioning === 'mid') score += 5;
-  
-  // 定制能力
-  if (product.customizationCapability === 'strong') score += 8;
-  else if (product.customizationCapability === 'medium') score += 5;
-  else if (product.customizationCapability === 'weak') score += 2;
-  
-  // 研发能力
-  if (product.hasRAndD) {
-    score += 5;
-    if (product.patentCount === '>10') score += 5;
-    else if (product.patentCount === '5-10') score += 3;
-    else if (product.patentCount === '1-5') score += 2;
+  if (!hasProductInfo) {
+    return 25; // 未填写产品信息，给予基础分
   }
   
-  // 质量控制
-  score += Math.min(product.qualityControl.length * 2, 8);
+  let score = 25; // 降低基础分
   
-  // 供应链稳定性
-  if (product.supplyChainStability === 'excellent') score += 7;
-  else if (product.supplyChainStability === 'good') score += 5;
-  else if (product.supplyChainStability === 'average') score += 2;
+  // 认证情况（最高20分）
+  score += Math.min(product.certifications.length * 4, 20);
+  
+  // 价格定位（最高15分）
+  if (product.pricePositioning === 'premium') score += 15;
+  else if (product.pricePositioning === 'mid-high') score += 10;
+  else if (product.pricePositioning === 'mid') score += 7;
+  else if (product.pricePositioning) score += 3;
+  
+  // 定制能力（最高12分）
+  if (product.customizationCapability === 'strong') score += 12;
+  else if (product.customizationCapability === 'medium') score += 8;
+  else if (product.customizationCapability === 'weak') score += 4;
+  
+  // 研发能力（最高15分）
+  if (product.hasRAndD) {
+    score += 5;
+    if (product.patentCount === '>10') score += 10;
+    else if (product.patentCount === '5-10') score += 7;
+    else if (product.patentCount === '1-5') score += 4;
+  }
+  
+  // 质量控制（最高10分）
+  score += Math.min(product.qualityControl.length * 2, 10);
+  
+  // 供应链稳定性（最高10分）
+  if (product.supplyChainStability === 'excellent') score += 10;
+  else if (product.supplyChainStability === 'good') score += 7;
+  else if (product.supplyChainStability === 'average') score += 3;
+  
+  // 生产规模（最高8分）- 暂时注释，类型中不存在此字段
+  // if (product.productionScale === 'large') score += 8;
+  // else if (product.productionScale === 'medium') score += 5;
+  // else if (product.productionScale === 'small') score += 3;
   
   return Math.min(100, score);
 }
@@ -459,27 +487,38 @@ function calculateOperationScore(
   operation: OperationCapability,
   diagnosis: OverseasDiagnosis
 ): number {
-  let score = 30;
+  // 检查是否有填写运营信息
+  const hasOperationInfo = operation.digitalLevel || operation.marketingBudget || operation.hasBrand !== undefined;
+  const hasChannelInfo = Object.values(diagnosis.channels).some(v => 
+    Array.isArray(v) ? v.length > 0 : v === true
+  );
   
-  // 渠道布局
+  if (!hasOperationInfo && !hasChannelInfo) {
+    return 20; // 未填写运营信息，给予基础分
+  }
+  
+  let score = 20; // 降低基础分
+  
+  // 渠道布局（最高25分）
   const channelCount = Object.values(diagnosis.channels).filter(v => 
     Array.isArray(v) ? v.length > 0 : v === true
   ).length;
-  score += Math.min(channelCount * 5, 20);
+  score += Math.min(channelCount * 5, 25);
   
-  // 数字化工具
+  // 数字化工具（最高15分）
   if (operation.hasCRM) score += 5;
   if (operation.hasERP) score += 5;
   if (operation.digitalLevel === 'advanced') score += 10;
   else if (operation.digitalLevel === 'intermediate') score += 6;
   else if (operation.digitalLevel === 'basic') score += 3;
   
-  // 营销投入
-  if (operation.marketingBudget === '>10%') score += 8;
-  else if (operation.marketingBudget === '5-10%') score += 5;
-  else if (operation.marketingBudget === '2-5%') score += 3;
+  // 营销投入（最高10分）
+  if (operation.marketingBudget === '>10%') score += 10;
+  else if (operation.marketingBudget === '5-10%') score += 7;
+  else if (operation.marketingBudget === '2-5%') score += 4;
+  else if (operation.marketingBudget) score += 2;
   
-  // 品牌建设
+  // 品牌建设（最高15分）
   if (operation.hasBrand) {
     score += 5;
     if (operation.brandAwareness === 'high') score += 10;
@@ -487,42 +526,75 @@ function calculateOperationScore(
     else if (operation.brandAwareness === 'low') score += 3;
   }
   
-  // 品牌保护
+  // 品牌保护（最高6分）
   score += Math.min(operation.brandProtection.length * 2, 6);
+  
+  // 社媒运营（最高9分）- socialOperation是对象类型，需要检查其属性
+  if (operation.socialOperation && operation.socialOperation.totalFollowers) {
+    score += 3;
+    // 根据粉丝数判断运营水平
+    const followers = parseInt(operation.socialOperation.totalFollowers) || 0;
+    if (followers >= 10000) score += 6;
+    else if (followers >= 1000) score += 4;
+    else score += 2;
+  }
   
   return Math.min(100, score);
 }
 
 // 计算资源配置得分
 function calculateResourceScore(resource: ResourceAndPlan): number {
-  let score = 30;
+  // 检查是否有填写资源信息
+  const hasResourceInfo = resource.exportBudget || resource.financingCapability || resource.targetMarkets.length > 0;
   
-  // 预算投入
-  if (resource.exportBudget === '>500') score += 15;
-  else if (resource.exportBudget === '200-500') score += 12;
-  else if (resource.exportBudget === '100-200') score += 9;
-  else if (resource.exportBudget === '50-100') score += 6;
-  else if (resource.exportBudget === '20-50') score += 3;
+  if (!hasResourceInfo) {
+    return 20; // 未填写资源信息，给予基础分
+  }
   
-  // 融资能力
-  if (resource.financingCapability === 'strong') score += 8;
-  else if (resource.financingCapability === 'medium') score += 5;
-  else if (resource.financingCapability === 'weak') score += 2;
+  let score = 20; // 降低基础分
   
-  // 政策支持
+  // 预算投入（最高20分）
+  if (resource.exportBudget === '>500') score += 20;
+  else if (resource.exportBudget === '200-500') score += 16;
+  else if (resource.exportBudget === '100-200') score += 12;
+  else if (resource.exportBudget === '50-100') score += 8;
+  else if (resource.exportBudget === '20-50') score += 4;
+  else if (resource.exportBudget) score += 2;
+  
+  // 融资能力（最高10分）
+  if (resource.financingCapability === 'strong') score += 10;
+  else if (resource.financingCapability === 'medium') score += 6;
+  else if (resource.financingCapability === 'weak') score += 3;
+  
+  // 政策支持（最高9分）
   score += Math.min(resource.governmentSupport.length * 3, 9);
   
-  // 规划清晰度
+  // 规划清晰度（最高12分）
   if (resource.hasClearPlan) {
     score += 5;
-    if (resource.planTimeframe === '>3years') score += 5;
-    else if (resource.planTimeframe === '1-3years') score += 3;
+    if (resource.planTimeframe === '>3years') score += 7;
+    else if (resource.planTimeframe === '1-3years') score += 4;
+    else if (resource.planTimeframe) score += 2;
   }
   
-  // 风险意识
+  // 风险意识（最高10分）
   if (resource.perceivedRisks.length > 0 && resource.riskMitigation.length > 0) {
-    score += 8;
+    score += 10;
+  } else if (resource.perceivedRisks.length > 0 || resource.riskMitigation.length > 0) {
+    score += 5;
   }
+  
+  // 目标市场明确度（最高10分）
+  if (resource.targetMarkets.length >= 3) score += 10;
+  else if (resource.targetMarkets.length >= 2) score += 7;
+  else if (resource.targetMarkets.length >= 1) score += 4;
+  
+  // 目标营收（最高10分）
+  if (resource.targetRevenue === '>100%') score += 10;
+  else if (resource.targetRevenue === '50-100%') score += 7;
+  else if (resource.targetRevenue === '30-50%') score += 5;
+  else if (resource.targetRevenue === '10-30%') score += 3;
+  else if (resource.targetRevenue) score += 1;
   
   return Math.min(100, score);
 }
@@ -533,25 +605,52 @@ function calculatePotentialScore(
   product: ProductCompetitiveness,
   resource: ResourceAndPlan
 ): number {
-  let score = 40;
+  // 检查是否有填写发展相关信息
+  const hasPotentialInfo = profile.coreCompetency.length > 0 || resource.targetMarkets.length > 0 || product.hasRAndD !== undefined;
   
-  // 核心优势
+  if (!hasPotentialInfo) {
+    return 25; // 未填写发展信息，给予基础分
+  }
+  
+  let score = 25; // 降低基础分
+  
+  // 核心优势（最高15分）
   score += Math.min(profile.coreCompetency.length * 3, 15);
   
-  // 目标市场明确度
+  // 目标市场明确度（最高10分）
   if (resource.targetMarkets.length >= 3) score += 10;
-  else if (resource.targetMarkets.length >= 1) score += 5;
+  else if (resource.targetMarkets.length >= 2) score += 7;
+  else if (resource.targetMarkets.length >= 1) score += 4;
   
-  // 目标营收
+  // 目标营收（最高15分）
   if (resource.targetRevenue === '>100%') score += 15;
-  else if (resource.targetRevenue === '50-100%') score += 10;
-  else if (resource.targetRevenue === '30-50%') score += 7;
-  else if (resource.targetRevenue === '10-30%') score += 4;
+  else if (resource.targetRevenue === '50-100%') score += 11;
+  else if (resource.targetRevenue === '30-50%') score += 8;
+  else if (resource.targetRevenue === '10-30%') score += 5;
+  else if (resource.targetRevenue) score += 2;
   
-  // 研发创新
-  if (product.hasRAndD && product.annualNewProducts === '>10') score += 10;
-  else if (product.hasRAndD && product.annualNewProducts === '5-10') score += 6;
-  else if (product.hasRAndD) score += 3;
+  // 研发创新（最高15分）
+  if (product.hasRAndD) {
+    score += 5;
+    if (product.annualNewProducts === '>10') score += 10;
+    else if (product.annualNewProducts === '5-10') score += 7;
+    else if (product.annualNewProducts === '1-5') score += 4;
+    else if (product.annualNewProducts) score += 2;
+  }
+  
+  // 行业优势加分（最高10分）
+  if (profile.industry === 'energy' || profile.industry === 'electronics') {
+    score += 10;
+  } else if (profile.industry === 'machinery' || profile.industry === 'auto') {
+    score += 8;
+  } else if (profile.industry) {
+    score += 5;
+  }
+  
+  // 研发投入比例（最高10分）
+  if (profile.rAndDStaffRatio === '>30%') score += 10;
+  else if (profile.rAndDStaffRatio === '10-30%') score += 6;
+  else if (profile.rAndDStaffRatio) score += 3;
   
   return Math.min(100, score);
 }
