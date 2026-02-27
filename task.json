@@ -1,0 +1,247 @@
+{
+  "project": "企业出海服务评测系统 - V3.0深度优化",
+  "description": "基于用户反馈的全面升级：问卷体验优化、算法提升、数据扩充、UI精简",
+  "version": "3.0",
+  "lastUpdated": "2026-02-27",
+  "principles": {
+    "debugFirst": "每个修改后必须测试，发现问题立即修复",
+    "incremental": "小步快跑，每次只改一个功能",
+    "backup": "修改前备份原文件",
+    "verify": "用browser工具验证UI，用console验证逻辑",
+    "notionSafe": "修改问卷字段时必须同步更新Notion数据库配置"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "title": "删除限时优惠模块",
+      "description": "删除报告页面中的'限时优惠5000元'模块，提升专业度",
+      "steps": [
+        "备份 ReportPage.tsx",
+        "找到 LimitedOffer 组件引用位置",
+        "删除或注释掉 LimitedOffer 组件",
+        "检查是否有相关导入需要清理",
+        "运行 npm run build 检查编译",
+        "提交更改"
+      ],
+      "debugCheck": [
+        "报告页面是否正常显示？",
+        "是否还有限时优惠相关内容？",
+        "控制台有无报错？"
+      ],
+      "passes": true,
+      "priority": "high",
+      "estimatedTime": "30分钟",
+      "completedAt": "2026-02-26",
+      "notes": "已完成"
+    },
+    {
+      "id": 2,
+      "title": "问卷分页式重构",
+      "description": "将长问卷改为分页式，每页3-5题，添加进度条",
+      "steps": [
+        "备份所有问卷页面组件",
+        "创建新的分页容器组件 QuestionnaireContainer",
+        "添加步骤指示器和进度条",
+        "将每个页面的问题拆分为多个子步骤",
+        "添加'上一步'和'下一步'按钮",
+        "实现进度保存到 localStorage",
+        "运行 npm run build 检查编译",
+        "测试分页流程"
+      ],
+      "debugCheck": [
+        "分页切换是否正常？",
+        "进度条是否准确显示？",
+        "上一步/下一步按钮是否正常？",
+        "所有数据是否能正确提交？"
+      ],
+      "passes": true,
+      "priority": "high",
+      "estimatedTime": "4小时",
+      "completedAt": "2026-02-26",
+      "notes": "已完成，修复了导航按钮bug"
+    },
+    {
+      "id": 3,
+      "title": "企业规模分类精细化",
+      "description": "优化员工数量和年营业额的分类选项，按企业类型细分",
+      "steps": [
+        "备份 types/questionnaire.ts",
+        "修改员工规模选项",
+        "修改年营业额选项",
+        "更新 ProfilePage 中的表单选项",
+        "检查所有引用的地方",
+        "更新评分算法中的权重计算",
+        "运行 npm run build 检查编译",
+        "测试表单提交"
+      ],
+      "debugCheck": [
+        "新选项是否正确显示？",
+        "数据是否能正确保存？",
+        "评分算法是否正常？"
+      ],
+      "passes": true,
+      "priority": "high",
+      "estimatedTime": "2小时",
+      "completedAt": "2026-02-26",
+      "notes": "已完成"
+    },
+    {
+      "id": 4,
+      "title": "问卷问题精简优化",
+      "description": "删除过于细节的问题，合并重复信息，优化用户体验",
+      "steps": [
+        "备份所有问卷页面组件",
+        "审查每个问题：是否必要？是否重复？",
+        "删除过于技术细节的问题",
+        "合并重复的信息收集字段",
+        "优化问题描述，使其更简洁明了",
+        "运行 npm run build 检查编译",
+        "测试完整问卷流程"
+      ],
+      "debugCheck": [
+        "问卷流程是否流畅？",
+        "删除的问题是否影响评分？",
+        "数据收集是否完整？",
+        "报告生成是否正常？"
+      ],
+      "passes": true,
+      "priority": "medium",
+      "estimatedTime": "3小时",
+      "completedAt": "2026-02-27",
+      "notes": "已完成，总字段数从约63个减少到约36个（减少43%）"
+    },
+    {
+      "id": 5,
+      "title": "对标企业库扩充 - 第一阶段",
+      "description": "扩充对标企业库至30家，覆盖主要行业",
+      "steps": [
+        "备份 utils/benchmarkData.ts",
+        "收集机械设备行业标杆企业（5家）",
+        "收集电子电气行业标杆企业（5家）",
+        "收集纺织服装行业标杆企业（5家）",
+        "收集医疗器械行业标杆企业（5家）",
+        "收集建材五金行业标杆企业（5家）",
+        "收集新能源行业标杆企业（5家）",
+        "确保数据来源权威",
+        "更新 benchmarkMatcher.ts 匹配算法",
+        "运行 npm run build 检查编译",
+        "测试对标企业推荐功能"
+      ],
+      "debugCheck": [
+        "对标企业是否正确显示？",
+        "匹配度计算是否准确？",
+        "数据来源是否标注清楚？"
+      ],
+      "passes": false,
+      "priority": "high",
+      "estimatedTime": "6小时",
+      "notes": "待开始"
+    },
+    {
+      "id": 6,
+      "title": "目标市场数据优化",
+      "description": "引入权威市场数据，按行业细分市场需求",
+      "steps": [
+        "备份 utils/marketData.ts",
+        "收集各主要市场的权威数据",
+        "按行业分类整理市场需求",
+        "添加市场进入难度评分",
+        "添加竞争对手分析数据",
+        "更新 marketRecommender.ts 推荐算法",
+        "运行 npm run build 检查编译",
+        "测试市场推荐功能"
+      ],
+      "debugCheck": [
+        "市场数据是否正确显示？",
+        "推荐算法是否正常？",
+        "数据来源是否标注？"
+      ],
+      "passes": false,
+      "priority": "medium",
+      "estimatedTime": "4小时",
+      "notes": "待开始"
+    },
+    {
+      "id": 7,
+      "title": "Notion同步配置更新",
+      "description": "更新Notion数据库字段，确保与新问卷配置匹配",
+      "steps": [
+        "备份 .github/scripts/sync-to-notion.js",
+        "检查问卷字段变化清单",
+        "在Notion中更新数据库字段",
+        "更新 sync-to-notion.js 字段映射",
+        "测试同步功能",
+        "验证数据完整性"
+      ],
+      "debugCheck": [
+        "Notion数据库字段是否正确？",
+        "同步脚本是否正常？",
+        "数据是否能正确同步？"
+      ],
+      "passes": false,
+      "priority": "high",
+      "estimatedTime": "2小时",
+      "warning": "此任务影响数据同步，务必谨慎操作",
+      "notes": "待开始"
+    },
+    {
+      "id": 8,
+      "title": "全面测试验证",
+      "description": "所有优化完成后进行全面测试",
+      "steps": [
+        "运行 npm run build 检查编译错误",
+        "完整走一遍测评流程",
+        "测试所有优化功能",
+        "测试Notion同步",
+        "测试移动端适配",
+        "检查控制台报错",
+        "修复发现的问题",
+        "提交所有更改"
+      ],
+      "debugCheck": [
+        "编译是否通过？",
+        "分页流程是否完整？",
+        "所有功能是否正常？",
+        "Notion同步是否正常？",
+        "移动端是否正常？"
+      ],
+      "passes": false,
+      "priority": "high",
+      "estimatedTime": "2小时",
+      "notes": "待开始"
+    }
+  ],
+  "debugGuidelines": {
+    "beforeStart": [
+      "备份原文件",
+      "确保开发服务器能正常启动",
+      "准备好browser工具"
+    ],
+    "duringDevelopment": [
+      "每改一个小功能就测试",
+      "发现问题立即停下修复",
+      "不要积累多个bug再处理",
+      "善用console.log调试"
+    ],
+    "afterChange": [
+      "用browser工具验证UI",
+      "检查控制台有无报错",
+      "测试交互功能",
+      "确认移动端正常"
+    ],
+    "commonIssues": {
+      "编译错误": "检查import路径、语法错误、类型匹配",
+      "页面空白": "检查组件导出、路由配置、数据传递",
+      "样式错乱": "检查className、响应式断点、CSS冲突",
+      "功能失效": "检查事件绑定、状态更新、API调用",
+      "Notion同步失败": "检查字段映射、数据库权限、数据格式"
+    }
+  },
+  "successCriteria": {
+    "functional": "所有优化功能正常工作",
+    "visual": "UI美观、布局合理、移动端适配",
+    "performance": "页面加载快、交互流畅",
+    "bugFree": "控制台无报错、无异常行为",
+    "dataSync": "Notion同步正常，数据完整"
+  }
+}
