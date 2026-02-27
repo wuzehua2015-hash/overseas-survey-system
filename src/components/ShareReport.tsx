@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share2, Check, Copy, Link2, MessageSquare, Link as LinkIcon, Download, Image as ImageIcon } from 'lucide-react';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import html2canvas from 'html2canvas';
+import QRCode from 'qrcode';
 
 interface ShareReportProps {
   companyName: string;
@@ -43,10 +44,31 @@ export function ShareReport({ companyName, score, level }: ShareReportProps) {
   const [copiedFull, setCopiedFull] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const posterRef = useRef<HTMLDivElement>(null);
   
   // 生成分享链接
   const shareUrl = `${getShareBaseUrl()}?share=true`;
+  
+  // 生成二维码
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        const url = await QRCode.toDataURL(shareUrl, {
+          width: 80,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#ffffff',
+          },
+        });
+        setQrCodeUrl(url);
+      } catch (err) {
+        console.error('QR Code generation failed:', err);
+      }
+    };
+    generateQR();
+  }, [shareUrl]);
   
   // 分享文案
   const shareText = `【${companyName}】的出海成熟度评估报告：综合得分${score}分，被评为"${level}"。来看看你的企业出海 readiness 如何？`;
@@ -184,11 +206,15 @@ export function ShareReport({ companyName, score, level }: ShareReportProps) {
               {/* 二维码区域 */}
               <div className="bg-white/10 backdrop-blur rounded-xl p-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                    <div className="text-center">
-                      <div className="text-3xl mb-1">📱</div>
-                      <div className="text-[8px] text-slate-400">扫码测评</div>
-                    </div>
+                  <div className="w-20 h-20 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {qrCodeUrl ? (
+                      <img src={qrCodeUrl} alt="扫码测评" className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="text-center">
+                        <div className="text-3xl mb-1">📱</div>
+                        <div className="text-[8px] text-slate-400">扫码测评</div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium mb-1">扫码免费测评</p>
