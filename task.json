@@ -180,11 +180,11 @@
         "同步脚本是否正常？",
         "数据是否能正确同步？"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "high",
       "estimatedTime": "2小时",
-      "warning": "此任务影响数据同步，务必谨慎操作",
-      "notes": "待开始"
+      "completedAt": "2026-02-27",
+      "notes": "已完成，sync-to-notion.js 与精简后的问卷兼容，核心字段无变化"
     },
     {
       "id": 8,
