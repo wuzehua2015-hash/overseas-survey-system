@@ -157,10 +157,11 @@
         "推荐算法是否正常？",
         "数据来源是否标注？"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "medium",
       "estimatedTime": "4小时",
-      "notes": "待开始"
+      "completedAt": "2026-02-27",
+      "notes": "已完成，引入2024年海关总署、贸促会权威数据"
     },
     {
       "id": 7,
