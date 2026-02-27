@@ -207,10 +207,10 @@
         "Notion同步是否正常？",
         "移动端是否正常？"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "high",
       "estimatedTime": "2小时",
-      "notes": "待开始"
+      "notes": "已完成，编译检查通过，创建测试报告，核心功能正常"
     }
   ],
   "debugGuidelines": {
