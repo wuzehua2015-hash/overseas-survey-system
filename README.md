@@ -119,9 +119,151 @@ npm install qrcode @types/qrcode
 **原因**: `subSteps.ts` 中配置与实际页面不匹配
 **解决**: 同步更新 `STEP_CONFIG` 与实际页面步骤数
 
-#### 6. sync-to-notion 反复失败的 ES Module 兼容性问题 ⭐
-**问题**: GitHub Actions 中 sync-to-notion 脚本反复出现 `require is not defined` 错误
-**原因**: 
+#### 6. GitHub → Notion 同步的完整技术方案 ⭐⭐⭐
+**问题**: GitHub Actions 同步到 Notion 反复失败，经历多次修复才彻底解决
+
+**完整解决方案**:
+
+**第一步：选择正确的 Module 类型**
+```bash
+# 方案A：使用 ES Module（.mjs 或 package.json 设置 "type": "module"）
+# 使用 import 语法
+import https from 'https';
+
+# 方案B：使用 CommonJS（.cjs 或默认 .js）
+# 使用 require 语法
+const https = require('https');
+```
+
+**第二步：处理多分支 workflow 问题**
+```bash
+# 关键：GitHub Pages 使用 gh-pages 分支
+# 当数据推送到 gh-pages 分支时，触发的是 gh-pages 分支的 workflow
+
+# 确保两个分支的脚本一致
+# main 分支
+git checkout main
+# 修改 .github/scripts/sync-to-notion.cjs
+git add .github/
+git commit -m "update sync script"
+git push origin main
+
+# gh-pages 分支（必须同步更新！）
+git checkout gh-pages
+# 同步修改 .github/scripts/sync-to-notion.cjs
+git add .github/
+git commit -m "sync sync-to-notion from main"
+git push origin gh-pages
+```
+
+**第三步：正确的脚本结构（CommonJS 方案）**
+```javascript
+// .github/scripts/sync-to-notion.cjs
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
+const NOTION_API_KEY = process.env.NOTION_API_KEY;
+const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
+
+// 行业中文映射
+const INDUSTRY_MAP = {
+  'machinery': '机械设备',
+  'electronics': '电子电气',
+  // ...
+};
+
+// 读取提交数据
+function getSubmissions() {
+  const DATA_DIR = process.env.DATA_PATH || 'data/submissions';
+  const files = fs.readdirSync(DATA_DIR);
+  // ...
+}
+
+// 同步到 Notion
+async function syncToNotion(submission) {
+  const options = {
+    hostname: 'api.notion.com',
+    port: 443,
+    path: `/v1/pages`,
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${NOTION_API_KEY}`,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2022-06-28'
+    }
+  };
+  // ...
+}
+
+// 主函数
+async function main() {
+  const submissions = getSubmissions();
+  for (const submission of submissions) {
+    await syncToNotion(submission);
+  }
+}
+
+main().catch(console.error);
+```
+
+**第四步：workflow 配置**
+```yaml
+# .github/workflows/sync-to-notion.yml
+name: Sync to Notion
+
+on:
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - 'data/submissions/**'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Sync to Notion
+        working-directory: ./main
+        run: node .github/scripts/sync-to-notion.cjs
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          DATA_PATH: '../gh-pages/data/submissions'
+```
+
+**关键要点**:
+1. **文件扩展名决定 Module 类型**：`.cjs` = CommonJS，`.mjs` = ES Module
+2. **语法必须匹配**：CommonJS 用 `require`，ES Module 用 `import`
+3. **多分支同步**：main 和 gh-pages 分支的脚本必须保持一致
+4. **环境变量**：使用 `process.env` 读取 Secrets
+5. **错误处理**：使用 try-catch 和 async/await 处理异步操作
+
+**常见错误及解决**:
+| 错误 | 原因 | 解决 |
+|------|------|------|
+| `require is not defined` | ES Module 环境用 CommonJS | 改为 `.cjs` 扩展名 |
+| `Cannot use import statement` | CommonJS 环境用 ES Module | 改为 `require` 语法 |
+| `module is not defined` | 混用两种语法 | 统一使用一种语法 |
+| Workflow 不触发 | 分支不匹配 | 确保 workflow 文件在正确的分支 |
+
+---
 - `package.json` 设置了 `"type": "module"`，项目使用 ES Module
 - `sync-to-notion.js` 使用了 `require('https')`，这是 CommonJS 语法
 - Node.js 18+ 默认将 `.js` 文件当作 ES Module 处理
