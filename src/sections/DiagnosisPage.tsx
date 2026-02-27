@@ -17,11 +17,12 @@ import { useSubStepNavigation } from '@/hooks/useSubStepNavigation';
 interface DiagnosisPageProps {
   data: OverseasDiagnosis;
   onUpdate: (diagnosis: Partial<OverseasDiagnosis>) => void;
+  onNext: (step: QuestionnaireStep) => void;
   onBack: () => void;
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
 }
 
-export function DiagnosisPage({ data, onUpdate, onBack, onSaveProgress }: DiagnosisPageProps) {
+export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }: DiagnosisPageProps) {
   const [localData, setLocalData] = useState<OverseasDiagnosis>(data);
   const [showB2BDetail, setShowB2BDetail] = useState(data.channels.b2bPlatform);
   const [showSocialDetail, setShowSocialDetail] = useState(data.channels.socialMedia);
@@ -43,6 +44,7 @@ export function DiagnosisPage({ data, onUpdate, onBack, onSaveProgress }: Diagno
   } = useSubStepNavigation({
     mainStep: 'diagnosis',
     onSaveProgress,
+    onNextMainStep: onNext,
     onBackMainStep: onBack,
   });
 

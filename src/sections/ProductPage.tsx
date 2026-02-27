@@ -17,11 +17,12 @@ import { useSubStepNavigation } from '@/hooks/useSubStepNavigation';
 interface ProductPageProps {
   data: ProductCompetitiveness;
   onUpdate: (product: Partial<ProductCompetitiveness>) => void;
+  onNext: (step: QuestionnaireStep) => void;
   onBack: () => void;
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
 }
 
-export function ProductPage({ data, onUpdate, onBack, onSaveProgress }: ProductPageProps) {
+export function ProductPage({ data, onUpdate, onNext, onBack, onSaveProgress }: ProductPageProps) {
   const [localData, setLocalData] = useState<ProductCompetitiveness>(data);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function ProductPage({ data, onUpdate, onBack, onSaveProgress }: ProductP
   } = useSubStepNavigation({
     mainStep: 'product',
     onSaveProgress,
+    onNextMainStep: onNext,
     onBackMainStep: onBack,
   });
 

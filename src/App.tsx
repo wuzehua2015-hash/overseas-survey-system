@@ -122,6 +122,7 @@ function App() {
           <DiagnosisPage
             data={data.diagnosis}
             onUpdate={updateDiagnosis}
+            onNext={handleNext}
             onBack={handleBack}
             onSaveProgress={saveProgress}
           />
@@ -132,6 +133,7 @@ function App() {
           <ProductPage
             data={data.product}
             onUpdate={updateProduct}
+            onNext={handleNext}
             onBack={handleBack}
             onSaveProgress={saveProgress}
           />
@@ -142,6 +144,7 @@ function App() {
           <OperationPage
             data={data.operation}
             onUpdate={updateOperation}
+            onNext={handleNext}
             onBack={handleBack}
             onSaveProgress={saveProgress}
           />
@@ -152,6 +155,7 @@ function App() {
           <ResourcePage
             data={data.resource}
             onUpdate={updateResource}
+            onNext={handleNext}
             onBack={handleBack}
             onSaveProgress={saveProgress}
           />
