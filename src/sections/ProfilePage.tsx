@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, Building2, Users, Phone, Mail, Award, Factory } from 'lucide-react';
+import { ArrowRight, Building2, Users, Phone, Award } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -36,7 +36,6 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
     const newErrors: Partial<Record<keyof CompanyProfile, string>> = {};
     
     if (!localData.name.trim()) newErrors.name = '请输入企业名称';
-    if (!localData.companyNature) newErrors.companyNature = '请选择企业性质';
     if (!localData.companyType) newErrors.companyType = '请选择企业类型';
     if (!localData.industry) newErrors.industry = '请选择所属行业';
     if (!localData.mainProduct.trim()) newErrors.mainProduct = '请输入主要产品';
@@ -128,23 +127,6 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                 </div>
 
                 <div className="space-y-2">
-                  <Label>企业性质 <span className="text-red-500">*</span></Label>
-                  <Select value={localData.companyNature} onValueChange={(v) => updateField('companyNature', v as any)}>
-                    <SelectTrigger className={errors.companyNature ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="请选择" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="private">私营企业</SelectItem>
-                      <SelectItem value="state">国有/央企</SelectItem>
-                      <SelectItem value="joint">合资企业</SelectItem>
-                      <SelectItem value="foreign">外资企业</SelectItem>
-                      <SelectItem value="listed">上市公司</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.companyNature && <p className="text-red-500 text-sm">{errors.companyNature}</p>}
-                </div>
-
-                <div className="space-y-2">
                   <Label>企业类型 <span className="text-red-500">*</span></Label>
                   <Select value={localData.companyType} onValueChange={(v) => updateField('companyType', v as any)}>
                     <SelectTrigger className={errors.companyType ? 'border-red-500' : ''}>
@@ -160,14 +142,7 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                   </Select>
                   {errors.companyType && <p className="text-red-500 text-sm">{errors.companyType}</p>}
                 </div>
-              </div>
-            </div>
 
-            {/* 主营业务 */}
-            <div className="space-y-6 pt-6 border-t">
-              <h3 className="text-lg font-semibold text-slate-900 pb-2 border-b">主营业务</h3>
-              
-              <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>所属行业 <span className="text-red-500">*</span></Label>
                   <Select value={localData.industry} onValueChange={(v) => updateField('industry', v)}>
@@ -182,7 +157,14 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                   </Select>
                   {errors.industry && <p className="text-red-500 text-sm">{errors.industry}</p>}
                 </div>
+              </div>
+            </div>
 
+            {/* 主营业务 */}
+            <div className="space-y-6 pt-6 border-t">
+              <h3 className="text-lg font-semibold text-slate-900 pb-2 border-b">主营业务</h3>
+              
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>主要产品 <span className="text-red-500">*</span></Label>
                   <Input
@@ -225,7 +207,7 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
             <div className="space-y-6 pt-6 border-t">
               <h3 className="text-lg font-semibold text-slate-900 pb-2 border-b">企业规模</h3>
               
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>年营业额 <span className="text-red-500">*</span></Label>
                   <Select value={localData.annualRevenue} onValueChange={(v) => updateField('annualRevenue', v)}>
@@ -263,24 +245,6 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                   </Select>
                   {errors.employeeCount && <p className="text-red-500 text-sm">{errors.employeeCount}</p>}
                 </div>
-
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Factory className="w-4 h-4" />
-                    研发人员占比
-                  </Label>
-                  <Select value={localData.rAndDStaffRatio} onValueChange={(v) => updateField('rAndDStaffRatio', v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="请选择" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="<5%">5%以下</SelectItem>
-                      <SelectItem value="5-10%">5-10%</SelectItem>
-                      <SelectItem value="10-30%">10-30%</SelectItem>
-                      <SelectItem value=">30%">30%以上</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
             </div>
 
@@ -304,15 +268,6 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                 </div>
 
                 <div className="space-y-2">
-                  <Label>职位</Label>
-                  <Input
-                    value={localData.contactPosition}
-                    onChange={(e) => updateField('contactPosition', e.target.value)}
-                    placeholder="如：外贸经理"
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label>联系电话 <span className="text-red-500">*</span></Label>
                   <Input
                     value={localData.contactPhone}
@@ -321,19 +276,6 @@ export function ProfilePage({ data, onUpdate, onNext, onBack: _onBack, onSavePro
                     className={errors.contactPhone ? 'border-red-500' : ''}
                   />
                   {errors.contactPhone && <p className="text-red-500 text-sm">{errors.contactPhone}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    电子邮箱
-                  </Label>
-                  <Input
-                    value={localData.contactEmail}
-                    onChange={(e) => updateField('contactEmail', e.target.value)}
-                    placeholder="请输入邮箱"
-                    type="email"
-                  />
                 </div>
               </div>
             </div>
