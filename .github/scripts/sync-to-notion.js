@@ -14,6 +14,25 @@ const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
 const NOTION_CONSULTATION_DATABASE_ID = process.env.NOTION_CONSULTATION_DATABASE_ID;
 const DATA_DIR = process.env.DATA_PATH || '../gh-pages/data/submissions';
 
+// 行业中文映射表
+const industryMap = {
+  'machinery': '机械设备',
+  'electronics': '电子电气',
+  'auto': '汽车及零部件',
+  'textile': '纺织服装',
+  'chemical': '化工及新材料',
+  'medical': '医疗器械',
+  'building': '建材五金',
+  'furniture': '家具家居',
+  'food': '食品饮料',
+  'beauty': '美妆个护',
+  'sports': '体育户外',
+  'toys': '玩具礼品',
+  'packaging': '包装印刷',
+  'energy': '新能源',
+  'other': '其他行业'
+};
+
 // 读取所有提交文件
 function getSubmissions() {
   const submissions = [];
@@ -160,6 +179,7 @@ async function submitToNotion(databaseId, submission) {
     const consultation = submission.consultation || {};
     
     // 构建基础属性
+    const industryLabel = industryMap[contact.industry] || contact.industry || '未填写';
     const properties = {
       '提交ID': {
         rich_text: [{ text: { content: submission.id || '' } }]
@@ -177,7 +197,7 @@ async function submitToNotion(databaseId, submission) {
         rich_text: [{ text: { content: contact.email } }]
       },
       '所属行业': {
-        rich_text: [{ text: { content: contact.industry } }]
+        rich_text: [{ text: { content: industryLabel } }]
       },
       '评估得分': {
         number: assessment.score
