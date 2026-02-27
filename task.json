@@ -132,10 +132,11 @@
         "匹配度计算是否准确？",
         "数据来源是否标注清楚？"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "high",
       "estimatedTime": "6小时",
-      "notes": "待开始"
+      "completedAt": "2026-02-27",
+      "notes": "已完成，对标企业库从15家扩充到35家，涵盖大型上市公司和中小专精特新企业"
     },
     {
       "id": 6,

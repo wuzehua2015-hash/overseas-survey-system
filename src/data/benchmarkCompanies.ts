@@ -603,6 +603,770 @@ export const benchmarkCompanies: BenchmarkCompany[] = [
       '性价比是进入市场的有效策略'
     ],
     applicableScenarios: ['户外用品企业', '跨境电商企业', '代工转型企业']
+  },
+
+  // ========================================
+  // 医疗器械行业
+  // ========================================
+  {
+    id: 'mindray',
+    name: '迈瑞医疗',
+    industry: 'medical',
+    subIndustry: '医疗设备',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '广东深圳',
+    establishedYear: 1991,
+    employeeRange: '10000+',
+    annualRevenue: '367亿',
+    exportMarkets: ['北美', '欧洲', '拉美', '亚太', '中东', '非洲'],
+    exportRevenue: '164亿',
+    keyMilestones: [
+      '2024年海外收入占比超50%',
+      '在北美、欧洲等高端市场实现突破',
+      '生命信息与支持领域全球前三',
+      '体外诊断领域全球前五'
+    ],
+    coreCompetency: '生命信息与支持、体外诊断、医学影像',
+    competitiveAdvantage: '技术创新+产品齐全+服务网络',
+    expansionPath: '产品出口→本地化服务→高端市场突破→全球领先',
+    keyStrategies: [
+      '持续高研发投入（营收10%+）',
+      '建立海外研发中心和服务网络',
+      '高端人才引进和本地化团队',
+      '并购整合获取技术和渠道'
+    ],
+    learnablePoints: [
+      '高研发投入是医疗器械核心竞争力',
+      '本地化服务网络是进入市场的关键',
+      '高端市场需要长期投入和耐心',
+      '并购是快速获取技术的有效方式'
+    ],
+    applicableScenarios: ['医疗器械企业', '高技术制造企业', '研发驱动型企业']
+  },
+  {
+    id: 'unitedimaging',
+    name: '联影医疗',
+    industry: 'medical',
+    subIndustry: '医学影像',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '上海',
+    establishedYear: 2011,
+    employeeRange: '5000+',
+    annualRevenue: '103亿',
+    exportMarkets: ['美国', '欧洲', '日本', '东南亚', '中东'],
+    exportRevenue: '16亿',
+    keyMilestones: [
+      '2024年海外收入增长55%',
+      'PET/CT等高端设备进入美日欧市场',
+      '在美国建立研发中心和生产基地',
+      '超高端CT、MR实现国产替代'
+    ],
+    coreCompetency: '医学影像设备（CT、MR、PET/CT等）',
+    competitiveAdvantage: '技术创新+高端突破+产学研结合',
+    expansionPath: '国内市场领先→高端设备突破→海外市场拓展→全球竞争',
+    keyStrategies: [
+      '聚焦高端设备突破',
+      '产学研深度合作',
+      '海外建立研发和服务体系',
+      '参与国际标准制定'
+    ],
+    learnablePoints: [
+      '高端市场需要技术突破作为基础',
+      '产学研结合加速技术创新',
+      '参与国际标准提升话语权',
+      '海外建厂规避贸易壁垒'
+    ],
+    applicableScenarios: ['高端制造企业', '技术驱动型企业', '研发密集型行业']
+  },
+  {
+    id: 'yuwell',
+    name: '鱼跃医疗',
+    industry: 'medical',
+    subIndustry: '家用医疗器械',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '江苏丹阳',
+    establishedYear: 1998,
+    employeeRange: '5000+',
+    annualRevenue: '80亿',
+    exportMarkets: ['东南亚', '欧洲', '拉美', '中东', '非洲'],
+    exportRevenue: '15亿',
+    keyMilestones: [
+      '制氧机、血压计等家用医械龙头',
+      '通过并购整合扩大产品线',
+      '跨境电商渠道快速出海',
+      '在东南亚市场占有率领先'
+    ],
+    coreCompetency: '家用医疗器械（制氧机、血压计、血糖仪等）',
+    competitiveAdvantage: '产品齐全+渠道覆盖+性价比',
+    expansionPath: '国内市场深耕→产品线扩展→渠道出海→品牌出海',
+    keyStrategies: [
+      '并购整合快速扩展产品线',
+      '线上线下全渠道覆盖',
+      '跨境电商快速进入新兴市场',
+      '性价比策略打开市场'
+    ],
+    learnablePoints: [
+      '并购是快速扩展产品线的有效方式',
+      '全渠道覆盖提升市场占有率',
+      '跨境电商是新兴市场的快速通道',
+      '性价比是进入市场的有效策略'
+    ],
+    applicableScenarios: ['消费品医械企业', '渠道驱动型企业', '多品类企业']
+  },
+
+  // ========================================
+  // 纺织服装行业
+  // ========================================
+  {
+    id: 'shenzhou',
+    name: '申洲国际',
+    industry: 'textile',
+    subIndustry: '针织服装',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '浙江宁波',
+    establishedYear: 1988,
+    employeeRange: '90000+',
+    annualRevenue: '260亿',
+    exportMarkets: ['全球'],
+    exportRevenue: '260亿',
+    keyMilestones: [
+      '全球最大的纵向一体化针织制造商',
+      '为Nike、Adidas、优衣库等国际品牌代工',
+      '在越南、柬埔寨建有大型生产基地',
+      '垂直一体化模式行业标杆'
+    ],
+    coreCompetency: '纵向一体化针织服装制造',
+    competitiveAdvantage: '垂直整合+规模效应+快速反应',
+    expansionPath: '国内代工→国际大客户→海外建厂→垂直整合',
+    keyStrategies: [
+      '垂直一体化降低成本提升效率',
+      '绑定国际大客户获取稳定订单',
+      '海外建厂规避贸易壁垒',
+      '持续投入自动化和数字化'
+    ],
+    learnablePoints: [
+      '垂直整合是制造业降本增效的关键',
+      '绑定大客户获取稳定订单和现金流',
+      '海外产能布局规避贸易风险',
+      '自动化是应对成本上升的有效方式'
+    ],
+    applicableScenarios: ['服装制造企业', '代工企业', '劳动密集型企业']
+  },
+  {
+    id: 'huaxi',
+    name: '华利集团',
+    industry: 'textile',
+    subIndustry: '鞋类制造',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '广东中山',
+    establishedYear: 2004,
+    employeeRange: '100000+',
+    annualRevenue: '200亿',
+    exportMarkets: ['全球'],
+    exportRevenue: '200亿',
+    keyMilestones: [
+      '全球第二大运动鞋制造商',
+      '为Nike、Converse、Vans等品牌代工',
+      '在越南建有大型生产基地',
+      '年产能超2亿双'
+    ],
+    coreCompetency: '运动鞋设计制造',
+    competitiveAdvantage: '规模效应+快速交付+成本控制',
+    expansionPath: '国内生产→海外建厂→大客户绑定→全球供应',
+    keyStrategies: [
+      '大客户战略获取规模效应',
+      '海外建厂规避关税和成本上升',
+      '持续投入自动化提升效率',
+      '快速交付能力满足快时尚需求'
+    ],
+    learnablePoints: [
+      '大客户战略带来规模效应和稳定性',
+      '海外产能布局是应对成本上升的必要选择',
+      '自动化投入是长期竞争力的基础',
+      '快速交付是快时尚时代的核心竞争力'
+    ],
+    applicableScenarios: ['鞋类制造企业', '代工企业', '劳动密集型企业']
+  },
+  {
+    id: 'furatex',
+    name: '孚日股份',
+    industry: 'textile',
+    subIndustry: '家纺',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '山东潍坊',
+    establishedYear: 1987,
+    employeeRange: '5000+',
+    annualRevenue: '53亿',
+    exportMarkets: ['日本', '美国', '欧洲', '澳洲'],
+    exportRevenue: '38亿',
+    keyMilestones: [
+      '全球最大的毛巾生产企业',
+      '出口额连续20年行业第一',
+      '日本市场占有率超50%',
+      '从代工向自主品牌转型'
+    ],
+    coreCompetency: '毛巾、家纺产品设计制造',
+    competitiveAdvantage: '规模优势+品质稳定+客户粘性',
+    expansionPath: '国内生产→出口代工→大客户绑定→自主品牌',
+    keyStrategies: [
+      '规模优势降低成本',
+      '品质稳定建立客户信任',
+      '大客户长期合作建立粘性',
+      '自主品牌提升溢价'
+    ],
+    learnablePoints: [
+      '规模优势是制造业的核心竞争力',
+      '品质稳定是获取大客户的基础',
+      '长期合作建立客户粘性',
+      '自主品牌是提升利润率的必由之路'
+    ],
+    applicableScenarios: ['家纺企业', '代工企业', '传统制造业']
+  },
+
+  // ========================================
+  // 新能源行业
+  // ========================================
+  {
+    id: 'longi',
+    name: '隆基绿能',
+    industry: 'newenergy',
+    subIndustry: '光伏组件',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '陕西西安',
+    establishedYear: 2000,
+    employeeRange: '50000+',
+    annualRevenue: '825亿',
+    exportMarkets: ['欧洲', '亚太', '中东', '拉美', '非洲'],
+    exportRevenue: '385亿',
+    keyMilestones: [
+      '全球最大的光伏组件制造商',
+      '单晶硅片技术引领行业',
+      '在海外多国建立生产基地',
+      '组件出货量连续多年全球第一'
+    ],
+    coreCompetency: '单晶硅片、光伏组件、光伏电站',
+    competitiveAdvantage: '技术领先+规模效应+全球化布局',
+    expansionPath: '国内领先→技术突破→全球扩张→海外建厂',
+    keyStrategies: [
+      '持续技术创新保持领先',
+      '垂直整合降低成本',
+      '全球化产能布局',
+      '品牌建设和渠道拓展'
+    ],
+    learnablePoints: [
+      '技术创新是光伏行业的核心竞争力',
+      '垂直整合是降本增效的有效方式',
+      '全球化产能布局规避贸易风险',
+      '品牌建设提升溢价能力'
+    ],
+    applicableScenarios: ['光伏企业', '新能源企业', '技术驱动型企业']
+  },
+  {
+    id: 'jinko',
+    name: '晶科能源',
+    industry: 'newenergy',
+    subIndustry: '光伏组件',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '江西上饶',
+    establishedYear: 2006,
+    employeeRange: '30000+',
+    annualRevenue: '1000亿+',
+    exportMarkets: ['全球160+国家'],
+    exportRevenue: '700亿+',
+    keyMilestones: [
+      '全球光伏组件出货量领先',
+      '海外营收占比超70%',
+      '在东南亚、美国建有生产基地',
+      'N型TOPCon技术行业领先'
+    ],
+    coreCompetency: '光伏组件、电池片、硅片',
+    competitiveAdvantage: '全球化布局+技术创新+成本优势',
+    expansionPath: '国内生产→出口扩张→海外建厂→全球运营',
+    keyStrategies: [
+      '全球化产能布局规避贸易壁垒',
+      '持续技术创新保持竞争力',
+      '大客户战略获取稳定订单',
+      '本地化运营提升服务'
+    ],
+    learnablePoints: [
+      '全球化产能布局是应对贸易壁垒的关键',
+      '技术创新是保持竞争力的基础',
+      '大客户战略带来稳定订单',
+      '本地化运营提升客户满意度'
+    ],
+    applicableScenarios: ['光伏企业', '新能源企业', '全球化企业']
+  },
+  {
+    id: 'catl',
+    name: '宁德时代',
+    industry: 'newenergy',
+    subIndustry: '动力电池',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '福建宁德',
+    establishedYear: 2011,
+    employeeRange: '100000+',
+    annualRevenue: '4000亿+',
+    exportMarkets: ['欧洲', '北美', '亚太'],
+    exportRevenue: '1000亿+',
+    keyMilestones: [
+      '全球动力电池市场占有率第一',
+      '为特斯拉、宝马、奔驰等供货',
+      '在德国、匈牙利建有工厂',
+      '技术路线覆盖三元锂、磷酸铁锂、钠离子等'
+    ],
+    coreCompetency: '动力电池、储能电池',
+    competitiveAdvantage: '技术领先+规模优势+客户资源',
+    expansionPath: '国内市场领先→技术突破→大客户绑定→全球扩张',
+    keyStrategies: [
+      '持续高研发投入保持技术领先',
+      '绑定国际车企大客户',
+      '海外建厂贴近客户需求',
+      '垂直整合降低成本'
+    ],
+    learnablePoints: [
+      '技术领先是获取大客户的基础',
+      '绑定国际大客户提升品牌和技术',
+      '海外建厂贴近客户是必要选择',
+      '垂直整合是降本增效的有效方式'
+    ],
+    applicableScenarios: ['动力电池企业', '新能源企业', '技术驱动型企业']
+  },
+
+  // ========================================
+  // 电子电气行业
+  // ========================================
+  {
+    id: 'luxshare',
+    name: '立讯精密',
+    industry: 'electronics',
+    subIndustry: '消费电子代工',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '广东东莞',
+    establishedYear: 2004,
+    employeeRange: '200000+',
+    annualRevenue: '2600亿+',
+    exportMarkets: ['全球'],
+    exportRevenue: '2000亿+',
+    keyMilestones: [
+      '全球领先的消费电子精密制造龙头',
+      '苹果核心供应商，AirPods主力供应商',
+      '通过并购莱尼拓展汽车电子',
+      '从代工向模组、整机延伸'
+    ],
+    coreCompetency: '消费电子精密制造、连接器、声学',
+    competitiveAdvantage: '精密制造+大客户绑定+垂直整合',
+    expansionPath: '连接器起步→大客户绑定→产品线扩展→汽车电子',
+    keyStrategies: [
+      '大客户战略获取规模效应',
+      '垂直整合提升附加值',
+      '并购整合快速扩展',
+      '向汽车电子等新兴领域拓展'
+    ],
+    learnablePoints: [
+      '大客户战略是代工企业成功的关键',
+      '垂直整合是提升附加值的有效方式',
+      '并购是快速扩展产品线的手段',
+      '向新兴领域拓展寻找第二曲线'
+    ],
+    applicableScenarios: ['电子代工企业', '精密制造企业', '消费电子企业']
+  },
+  {
+    id: 'goertek',
+    name: '歌尔股份',
+    industry: 'electronics',
+    subIndustry: '声学器件',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '山东潍坊',
+    establishedYear: 2001,
+    employeeRange: '80000+',
+    annualRevenue: '1000亿+',
+    exportMarkets: ['全球'],
+    exportRevenue: '800亿+',
+    keyMilestones: [
+      '全球领先的声学器件制造商',
+      '苹果AirPods、Meta VR设备供应商',
+      'VR/AR领域全球领先',
+      '从声学向光学、微电子扩展'
+    ],
+    coreCompetency: '声学器件、VR/AR设备、精密制造',
+    competitiveAdvantage: '技术领先+大客户绑定+产品线扩展',
+    expansionPath: '声学器件→大客户绑定→VR/AR→多元化',
+    keyStrategies: [
+      '技术领先建立护城河',
+      '大客户战略获取稳定订单',
+      '布局VR/AR等新兴领域',
+      '产品线多元化降低风险'
+    ],
+    learnablePoints: [
+      '技术领先是建立护城河的基础',
+      '大客户战略带来稳定性',
+      '布局新兴领域寻找增长点',
+      '多元化降低单一客户风险'
+    ],
+    applicableScenarios: ['电子制造企业', '声学器件企业', '新兴科技企业']
+  },
+  {
+    id: 'bydelectronics',
+    name: '比亚迪电子',
+    industry: 'electronics',
+    subIndustry: '手机代工',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '广东深圳',
+    establishedYear: 1995,
+    employeeRange: '100000+',
+    annualRevenue: '1300亿+',
+    exportMarkets: ['全球'],
+    exportRevenue: '800亿+',
+    keyMilestones: [
+      '全球领先的手机代工企业',
+      '为苹果、三星、华为等代工',
+      '从手机向汽车电子、AIoT扩展',
+      '垂直整合能力强'
+    ],
+    coreCompetency: '手机代工、汽车电子、AIoT',
+    competitiveAdvantage: '垂直整合+规模效应+技术积累',
+    expansionPath: '手机代工→产品线扩展→汽车电子→多元化',
+    keyStrategies: [
+      '垂直整合降低成本提升效率',
+      '大客户战略获取规模效应',
+      '向汽车电子等新兴领域拓展',
+      '技术创新保持竞争力'
+    ],
+    learnablePoints: [
+      '垂直整合是制造业的核心竞争力',
+      '大客户战略带来规模效应',
+      '向新兴领域拓展寻找增长点',
+      '技术创新是长期竞争力的基础'
+    ],
+    applicableScenarios: ['电子代工企业', '汽车电子企业', '多元化企业']
+  },
+
+  // ========================================
+  // 建材五金行业
+  // ========================================
+  {
+    id: 'cnBM',
+    name: '中国建材',
+    industry: 'building',
+    subIndustry: '水泥建材',
+    companyNature: 'state',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '北京',
+    establishedYear: 1984,
+    employeeRange: '100000+',
+    annualRevenue: '2000亿+',
+    exportMarkets: ['东南亚', '非洲', '中东', '南美'],
+    exportRevenue: '200亿+',
+    keyMilestones: [
+      '全球最大的水泥技术装备工程服务商',
+      '在海外承建300+条水泥生产线',
+      '中材国际是全球水泥工程市场龙头',
+      '技术和装备出口全球'
+    ],
+    coreCompetency: '水泥技术装备、工程服务',
+    competitiveAdvantage: '技术领先+工程经验+全球网络',
+    expansionPath: '国内工程→技术出口→海外工程→全球服务',
+    keyStrategies: [
+      '技术领先是获取海外订单的基础',
+      '工程经验丰富建立信任',
+      '全球服务网络提升响应速度',
+      '本地化运营提升竞争力'
+    ],
+    learnablePoints: [
+      '技术领先是工程服务企业的核心竞争力',
+      '丰富的项目经验是获取订单的关键',
+      '全球服务网络提升客户满意度',
+      '本地化运营是长期发展的基础'
+    ],
+    applicableScenarios: ['建材企业', '工程服务企业', '国有企业']
+  },
+  {
+    id: 'oriental',
+    name: '东方雨虹',
+    industry: 'building',
+    subIndustry: '防水材料',
+    companyNature: 'listed',
+    companyType: 'manufacturer',
+    stage: 'expansion',
+    location: '北京',
+    establishedYear: 1995,
+    employeeRange: '10000+',
+    annualRevenue: '300亿+',
+    exportMarkets: ['东南亚', '中东', '非洲', '南美'],
+    exportRevenue: '20亿+',
+    keyMilestones: [
+      '国内防水材料行业龙头',
+      '在东南亚、中东建立生产基地',
+      '产品出口100+国家',
+      '从材料向施工服务延伸'
+    ],
+    coreCompetency: '防水材料、防水工程',
+    competitiveAdvantage: '品牌优势+渠道覆盖+技术服务',
+    expansionPath: '国内市场领先→产品线扩展→渠道出海→海外建厂',
+    keyStrategies: [
+      '品牌优势建立客户信任',
+      '渠道覆盖提升市场占有率',
+      '技术服务提升客户粘性',
+      '海外建厂贴近市场'
+    ],
+    learnablePoints: [
+      '品牌优势是获取客户信任的基础',
+      '渠道覆盖是提升市占率的关键',
+      '技术服务提升客户粘性',
+      '海外建厂是长期发展的选择'
+    ],
+    applicableScenarios: ['建材企业', '消费品建材企业', '品牌驱动型企业']
+  },
+  {
+    id: 'cnbmintl',
+    name: '中材国际',
+    industry: 'building',
+    subIndustry: '水泥工程',
+    companyNature: 'state',
+    companyType: 'manufacturer',
+    stage: 'mature',
+    location: '北京',
+    establishedYear: 2001,
+    employeeRange: '10000+',
+    annualRevenue: '400亿+',
+    exportMarkets: ['全球'],
+    exportRevenue: '300亿+',
+    keyMilestones: [
+      '全球最大的水泥技术装备工程系统集成服务商',
+      '海外水泥工程市场占有率第一',
+      '在全球承建300+条水泥生产线',
+      '技术和装备出口到70+国家'
+    ],
+    coreCompetency: '水泥工程总承包、技术装备',
+    competitiveAdvantage: '技术领先+工程经验+全球网络',
+    expansionPath: '国内工程→技术出口→海外工程→全球服务',
+    keyStrategies: [
+      '技术领先获取高端订单',
+      '丰富经验建立客户信任',
+      '全球网络提升服务能力',
+      '本地化运营提升竞争力'
+    ],
+    learnablePoints: [
+      '技术领先是工程服务企业的核心竞争力',
+      '项目经验是获取订单的关键',
+      '全球服务网络提升响应速度',
+      '本地化是长期发展的基础'
+    ],
+    applicableScenarios: ['工程服务企业', '技术输出企业', '国有企业']
+  },
+
+  // ========================================
+  // 专精特新中小企业（贸促会推荐案例）
+  // ========================================
+  {
+    id: 'dawei',
+    name: '戴维医疗',
+    industry: 'medical',
+    subIndustry: '儿产科保育设备',
+    companyNature: 'private',
+    companyType: 'manufacturer',
+    stage: 'growth',
+    location: '浙江宁波',
+    establishedYear: 1992,
+    employeeRange: '500-1000',
+    annualRevenue: '5-10亿',
+    exportMarkets: ['欧洲', '东南亚', '中东', '拉美'],
+    exportRevenue: '1-2亿',
+    keyMilestones: [
+      '国家级专精特新"小巨人"企业',
+      '国内首家获取欧盟MDR认证证书的儿产科设备制造商',
+      '产品出口100+国家和地区',
+      '婴儿培养箱市场占有率国内领先'
+    ],
+    coreCompetency: '儿产科保育设备研发制造',
+    competitiveAdvantage: '技术专精+认证齐全+性价比高',
+    expansionPath: '国内市场深耕→技术突破→认证获取→海外拓展',
+    keyStrategies: [
+      '专注细分领域建立技术壁垒',
+      '获取国际认证打开高端市场',
+      '性价比策略进入新兴市场',
+      '贸促会等平台获取出海资源'
+    ],
+    learnablePoints: [
+      '专精特新是中小企业出海的优质路径',
+      '国际认证是进入高端市场的敲门砖',
+      '细分领域专注建立技术壁垒',
+      '贸促会等平台提供出海支持'
+    ],
+    applicableScenarios: ['专精特新企业', '医疗器械中小企业', '技术驱动型企业']
+  },
+  {
+    id: 'davidneedle',
+    name: '山东万世机械',
+    industry: 'machinery',
+    subIndustry: '建筑机械',
+    companyNature: 'private',
+    companyType: 'manufacturer',
+    stage: 'growth',
+    location: '山东济宁',
+    establishedYear: 2010,
+    employeeRange: '300-500',
+    annualRevenue: '5-10亿',
+    exportMarkets: ['东南亚', '中东', '非洲', '南美'],
+    exportRevenue: '2-3亿',
+    keyMilestones: [
+      '2025年省重点培育跨境电商品牌企业',
+      '通过阿里巴巴国际站快速拓展海外市场',
+      '激光整平机细分领域国内龙头',
+      '产品出口50+国家'
+    ],
+    coreCompetency: '激光整平机等建筑机械研发制造',
+    competitiveAdvantage: '技术专精+跨境电商+快速响应',
+    expansionPath: '国内细分市场领先→跨境电商出海→品牌建立→海外服务',
+    keyStrategies: [
+      '专注细分领域建立技术优势',
+      '跨境电商快速触达海外客户',
+      '快速响应客户需求建立口碑',
+      '贸促会等平台获取出海资源'
+    ],
+    learnablePoints: [
+      '跨境电商是中小企业出海的快速通道',
+      '细分领域专注建立技术壁垒',
+      '快速响应是获取客户的关键',
+      '贸促会等平台提供出海支持'
+    ],
+    applicableScenarios: ['机械制造企业', '跨境电商企业', '专精特新企业']
+  },
+  {
+    id: 'danyangoptical',
+    name: '丹阳眼镜产业集群代表企业',
+    industry: 'textile',
+    subIndustry: '眼镜制造',
+    companyNature: 'private',
+    companyType: 'manufacturer',
+    stage: 'growth',
+    location: '江苏丹阳',
+    establishedYear: 2005,
+    employeeRange: '100-300',
+    annualRevenue: '1-5亿',
+    exportMarkets: ['欧美', '东南亚', '中东'],
+    exportRevenue: '5000万-1亿',
+    keyMilestones: [
+      '丹阳眼镜产业基地代表企业',
+      '2023年前三季度出口35亿元，同比增长6.94%',
+      '从代工向自主品牌转型',
+      '通过跨境电商拓展海外市场'
+    ],
+    coreCompetency: '眼镜设计制造',
+    competitiveAdvantage: '产业集群+性价比+快速交付',
+    expansionPath: '代工起步→产业集群→跨境电商→品牌转型',
+    keyStrategies: [
+      '依托产业集群降低成本',
+      '跨境电商快速出海',
+      '从代工向品牌转型提升溢价',
+      '贸促会等平台获取出海资源'
+    ],
+    learnablePoints: [
+      '产业集群是中小企业的重要优势',
+      '跨境电商是快速出海的有效方式',
+      '品牌转型是提升利润率的必由之路',
+      '贸促会等平台提供出海支持'
+    ],
+    applicableScenarios: ['产业集群企业', '眼镜制造企业', '代工转型企业']
+  },
+  {
+    id: 'guangrun',
+    name: '光润通科技',
+    industry: 'electronics',
+    subIndustry: '光通信器件',
+    companyNature: 'private',
+    companyType: 'manufacturer',
+    stage: 'growth',
+    location: '北京',
+    establishedYear: 2009,
+    employeeRange: '100-300',
+    annualRevenue: '1-5亿',
+    exportMarkets: ['欧美', '东南亚'],
+    exportRevenue: '3000万-5000万',
+    keyMilestones: [
+      '北京市专精特新企业',
+      '光通信器件细分领域领先',
+      '产品出口30+国家',
+      '通过"京品出海"拓展海外市场'
+    ],
+    coreCompetency: '光通信器件研发制造',
+    competitiveAdvantage: '技术专精+产品可靠+服务响应快',
+    expansionPath: '国内市场→技术积累→认证获取→海外拓展',
+    keyStrategies: [
+      '技术专精建立竞争壁垒',
+      '产品可靠性建立客户信任',
+      '快速响应提升客户满意度',
+      '贸促会等平台获取出海资源'
+    ],
+    learnablePoints: [
+      '技术专精是中小企业核心竞争力',
+      '产品可靠性是获取客户的基础',
+      '快速响应是差异化竞争手段',
+      '贸促会等平台提供出海支持'
+    ],
+    applicableScenarios: ['专精特新企业', '光通信企业', '技术驱动型企业']
+  },
+  {
+    id: 'yettel',
+    name: '浙江野特户外',
+    industry: 'sports',
+    subIndustry: '户外装备',
+    companyNature: 'private',
+    companyType: 'manufacturer',
+    stage: 'growth',
+    location: '浙江杭州',
+    establishedYear: 2010,
+    employeeRange: '200-300',
+    annualRevenue: '3-5亿',
+    exportMarkets: ['北美', '欧洲', '日本'],
+    exportRevenue: '2-3亿',
+    keyMilestones: [
+      '露营装备细分领域领先',
+      '通过亚马逊和独立站出海',
+      '建立海外品牌"Naturehike"',
+      '在日韩市场知名度高'
+    ],
+    coreCompetency: '露营装备设计制造',
+    competitiveAdvantage: '性价比+设计+品质',
+    expansionPath: '代工起步→自主品牌→跨境电商→全球化',
+    keyStrategies: [
+      '从代工积累制造能力',
+      '自主品牌提升溢价',
+      '跨境电商快速出海',
+      '社交媒体种草营销'
+    ],
+    learnablePoints: [
+      '代工是积累能力的有效方式',
+      '跨境电商是品牌出海的快速通道',
+      '社交媒体对户外品类效果显著',
+      '性价比是进入市场的有效策略'
+    ],
+    applicableScenarios: ['户外用品企业', '跨境电商企业', '代工转型企业']
   }
 ];
 
