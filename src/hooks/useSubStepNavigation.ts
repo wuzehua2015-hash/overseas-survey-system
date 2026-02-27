@@ -90,14 +90,14 @@ export function useSubStepNavigation({
         timestamp: Date.now(),
       }));
     } else if (isLastSubStep && onNextMainStep) {
+      // 先清除当前子步骤状态，避免新页面读取到旧状态
+      localStorage.removeItem(`substep_${mainStep}`);
       // 进入下一个主步骤
       const nextMainStep = getNextMainStep(mainStep);
       onSaveProgress(mainStep, mainProgress);
       onNextMainStep(nextMainStep);
-      // 清除当前子步骤状态
-      localStorage.removeItem(`substep_${mainStep}`);
     }
-  }, [canGoNext, isLastSubStep, currentSubStep, mainStep, mainProgress, onSaveProgress, onNextMainStep]);
+  }, [canGoNext, isLastSubStep, currentSubStep, mainStep, mainProgress, onSaveProgress, onNextMainStep, totalSubSteps]);
 
   const goToPrevSubStep = useCallback(() => {
     if (canGoBack) {

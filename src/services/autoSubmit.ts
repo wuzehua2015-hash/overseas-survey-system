@@ -1,5 +1,6 @@
 import { submitToGitHub, type SubmissionData } from './githubStorage';
 import { submitToNotion } from './notionDirect';
+import { industryOptions } from '@/types/questionnaire';
 
 // 自动提交用户联系信息到 GitHub 和 Notion
 export async function autoSubmitContactInfo(
@@ -67,6 +68,10 @@ export async function autoSubmitContactInfo(
     }
   }
 
+  // 转换行业名称为中文
+  const industryMap = Object.fromEntries(industryOptions.map(i => [i.value, i.label]));
+  const industryLabel = industryMap[enhancedProfile.industry] || enhancedProfile.industry || '未填写行业';
+
   // 检查联系信息是否完整
   const hasContactInfo = enhancedProfile.contactName || enhancedProfile.contactPhone || enhancedProfile.contactEmail;
   const isComplete = enhancedProfile.contactName && enhancedProfile.contactPhone && enhancedProfile.contactEmail;
@@ -88,7 +93,7 @@ export async function autoSubmitContactInfo(
     contactName: enhancedProfile.contactName || '未填写',
     contactPhone: enhancedProfile.contactPhone || '未填写',
     contactEmail: enhancedProfile.contactEmail || '未填写',
-    industry: enhancedProfile.industry || '未填写行业',
+    industry: industryLabel, // 使用中文行业名称
     score: assessmentResult.totalScore,
     stage: assessmentResult.stage,
     level: assessmentResult.level,

@@ -841,7 +841,7 @@ export const benchmarkCompanies: BenchmarkCompany[] = [
   {
     id: 'longi',
     name: '隆基绿能',
-    industry: 'newenergy',
+    industry: 'energy',
     subIndustry: '光伏组件',
     companyNature: 'listed',
     companyType: 'manufacturer',
@@ -878,7 +878,7 @@ export const benchmarkCompanies: BenchmarkCompany[] = [
   {
     id: 'jinko',
     name: '晶科能源',
-    industry: 'newenergy',
+    industry: 'energy',
     subIndustry: '光伏组件',
     companyNature: 'listed',
     companyType: 'manufacturer',
@@ -915,7 +915,7 @@ export const benchmarkCompanies: BenchmarkCompany[] = [
   {
     id: 'catl',
     name: '宁德时代',
-    industry: 'newenergy',
+    industry: 'energy',
     subIndustry: '动力电池',
     companyNature: 'listed',
     companyType: 'manufacturer',

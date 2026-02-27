@@ -79,7 +79,7 @@ const tradeData2024 = {
   
   // 行业出口增长数据（2024年）
   industryExportGrowth: {
-    newenergy: { growth: '25%', volume: '约1.5万亿元', note: '光伏、锂电池、新能源汽车' },
+    energy: { growth: '25%', volume: '约1.5万亿元', note: '光伏、锂电池、新能源汽车' },
     electronics: { growth: '8.7%', volume: '约8万亿元', note: '消费电子、电子元器件' },
     machinery: { growth: '10.2%', volume: '约6万亿元', note: '机械设备、工程机械' },
     auto: { growth: '18.5%', volume: '约1.2万亿元', note: '新能源汽车出口爆发' },
@@ -90,7 +90,6 @@ const tradeData2024 = {
     furniture: { growth: '5.1%', volume: '约4000亿元', note: '家具出口' },
     beauty: { growth: '12%', volume: '约2000亿元', note: '美妆个护增长迅速' },
     food: { growth: '4.2%', volume: '约6000亿元', note: '食品农产品' },
-    energy: { growth: '3.8%', volume: '约2万亿元', note: '能源设备' },
   },
   
   // 数据来源
@@ -190,19 +189,12 @@ const industryMarketMatrix: Record<string, Record<string, number>> = {
     south_america: 70,
   },
   // 新能源 - 2024年增长最快领域+25%
-  newenergy: {
+  energy: {
     europe: 92,          // 光伏、储能需求大
     southeast_asia: 88,  // 光伏装机增长
     middle_east: 85,     // 沙特、阿联酋新能源投资
     north_america: 78,   // 储能市场
     cis: 75,
-  },
-  // 能源设备
-  energy: {
-    europe: 88,
-    north_america: 82,
-    middle_east: 85,
-    southeast_asia: 80,
   },
 };
 
