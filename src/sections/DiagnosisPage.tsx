@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { OverseasDiagnosis, QuestionnaireStep } from '@/types/questionnaire';
-import { b2bPlatformOptions, socialPlatformOptions, b2cPlatformOptions, marketOptions } from '@/types/questionnaire';
+import { marketOptions } from '@/types/questionnaire';
 import { QuestionnaireContainer } from '@/components/QuestionnaireContainer';
 import { useSubStepNavigation } from '@/hooks/useSubStepNavigation';
 
@@ -22,11 +22,19 @@ interface DiagnosisPageProps {
   onSaveProgress: (step: QuestionnaireStep, progress: number) => void;
 }
 
+// 简化的渠道选项
+const simpleChannelOptions = [
+  { key: 'b2bPlatform', label: 'B2B平台（阿里国际站/环球资源等）' },
+  { key: 'socialMedia', label: '社交媒体（LinkedIn/Facebook等）' },
+  { key: 'b2cPlatform', label: 'B2C跨境电商（亚马逊/速卖通等）' },
+  { key: 'independentSite', label: '独立站' },
+  { key: 'offlineExhibition', label: '线下展会' },
+  { key: 'overseasOffice', label: '海外办事处' },
+  { key: 'agentDistributor', label: '代理商/经销商' },
+];
+
 export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }: DiagnosisPageProps) {
   const [localData, setLocalData] = useState<OverseasDiagnosis>(data);
-  const [showB2BDetail, setShowB2BDetail] = useState(data.channels.b2bPlatform);
-  const [showSocialDetail, setShowSocialDetail] = useState(data.channels.socialMedia);
-  const [showB2CDetail, setShowB2CDetail] = useState(data.channels.b2cPlatform);
 
   useEffect(() => {
     onUpdate(localData);
@@ -72,14 +80,6 @@ export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }
       ? current.filter(i => i !== item)
       : [...current, item];
     updateField(field as keyof OverseasDiagnosis, updated as any);
-  };
-
-  const toggleChannelArray = (key: keyof OverseasDiagnosis['channels'], item: string) => {
-    const current = localData.channels[key] as string[];
-    const updated = current.includes(item)
-      ? current.filter(i => i !== item)
-      : [...current, item];
-    updateChannels(key, updated);
   };
 
   const stepTitles = ['业务现状', '市场覆盖', '渠道布局', '团队配置'];
@@ -209,7 +209,7 @@ export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }
     </div>
   );
 
-  // 渲染渠道布局
+  // 渲染渠道布局（简化版）
   const renderChannelLayout = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
@@ -217,126 +217,10 @@ export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }
         <h3 className="text-lg font-semibold text-slate-900">渠道布局</h3>
       </div>
       
-      <div className="space-y-4">
-        {/* B2B平台 */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              checked={localData.channels.b2bPlatform}
-              onCheckedChange={(checked) => {
-                updateChannels('b2bPlatform', checked);
-                setShowB2BDetail(checked as boolean);
-              }}
-            />
-            <Label className="cursor-pointer">使用B2B平台</Label>
-          </div>
-          {showB2BDetail && (
-            <div className="pl-8 space-y-2">
-              <Label className="text-sm text-slate-500">请选择使用的平台（可多选）</Label>
-              <div className="flex flex-wrap gap-2">
-                {b2bPlatformOptions.map((p) => (
-                  <label
-                    key={p.value}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border cursor-pointer transition-all text-sm ${
-                      localData.channels.b2bPlatformsUsed.includes(p.value)
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-slate-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <Checkbox
-                      checked={localData.channels.b2bPlatformsUsed.includes(p.value)}
-                      onCheckedChange={() => toggleChannelArray('b2bPlatformsUsed', p.value)}
-                    />
-                    {p.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 社交媒体 */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              checked={localData.channels.socialMedia}
-              onCheckedChange={(checked) => {
-                updateChannels('socialMedia', checked);
-                setShowSocialDetail(checked as boolean);
-              }}
-            />
-            <Label className="cursor-pointer">使用社交媒体营销</Label>
-          </div>
-          {showSocialDetail && (
-            <div className="pl-8 space-y-2">
-              <Label className="text-sm text-slate-500">请选择使用的平台（可多选）</Label>
-              <div className="flex flex-wrap gap-2">
-                {socialPlatformOptions.map((p) => (
-                  <label
-                    key={p.value}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border cursor-pointer transition-all text-sm ${
-                      localData.channels.socialPlatformsUsed.includes(p.value)
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-slate-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <Checkbox
-                      checked={localData.channels.socialPlatformsUsed.includes(p.value)}
-                      onCheckedChange={() => toggleChannelArray('socialPlatformsUsed', p.value)}
-                    />
-                    {p.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* B2C平台 */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              checked={localData.channels.b2cPlatform}
-              onCheckedChange={(checked) => {
-                updateChannels('b2cPlatform', checked);
-                setShowB2CDetail(checked as boolean);
-              }}
-            />
-            <Label className="cursor-pointer">使用B2C跨境电商平台</Label>
-          </div>
-          {showB2CDetail && (
-            <div className="pl-8 space-y-2">
-              <Label className="text-sm text-slate-500">请选择使用的平台（可多选）</Label>
-              <div className="flex flex-wrap gap-2">
-                {b2cPlatformOptions.map((p) => (
-                  <label
-                    key={p.value}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border cursor-pointer transition-all text-sm ${
-                      localData.channels.b2cPlatformsUsed.includes(p.value)
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-slate-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <Checkbox
-                      checked={localData.channels.b2cPlatformsUsed.includes(p.value)}
-                      onCheckedChange={() => toggleChannelArray('b2cPlatformsUsed', p.value)}
-                    />
-                    {p.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 其他渠道 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { key: 'independentSite', label: '独立站' },
-            { key: 'offlineExhibition', label: '线下展会' },
-            { key: 'overseasOffice', label: '海外办事处' },
-            { key: 'agentDistributor', label: '代理商/经销商' },
-          ].map(({ key, label }) => (
+      <div className="space-y-3">
+        <Label>已使用的出海渠道（可多选）</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {simpleChannelOptions.map(({ key, label }) => (
             <div key={key} className="flex items-center gap-3">
               <Checkbox
                 checked={localData.channels[key as keyof typeof localData.channels] as boolean}
@@ -350,7 +234,7 @@ export function DiagnosisPage({ data, onUpdate, onNext, onBack, onSaveProgress }
     </div>
   );
 
-  // 渲染团队配置
+  // 渲染团队配置（简化版）
   const renderTeamConfig = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
