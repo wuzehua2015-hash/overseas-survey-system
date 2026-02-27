@@ -18,7 +18,7 @@ jobs:
           node-version: '18'
           
       - name: Sync new submissions to Notion
-        run: node .github/scripts/sync-to-notion.js
+        run: node .github/scripts/sync-to-notion.cjs
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: 31155e5e-0a9e-8142-8361-c394d107afe3
