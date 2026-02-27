@@ -223,6 +223,35 @@ npm run build    # 构建
 npm run deploy   # 部署到 gh-pages
 ```
 
+#### 4. GitHub Actions Workflow 分支管理 ⭐⭐⭐
+**问题**: 修改了 main 分支的 workflow，但 gh-pages 分支的 workflow 还是旧的
+**原因**: 
+- GitHub Pages 部署使用 gh-pages 分支
+- 当数据推送到 gh-pages 分支时，触发的是 gh-pages 分支上的 workflow
+- main 分支和 gh-pages 分支都有 `.github/workflows/` 目录
+
+**解决方案**:
+```bash
+# 确保两个分支的 workflow 文件一致
+# 修改 main 分支后，也要同步修改 gh-pages 分支
+
+git checkout main
+# 修改 .github/workflows/xxx.yml
+git add .github/workflows/
+git commit -m "update workflow"
+git push origin main
+
+git checkout gh-pages
+# 同步修改 .github/workflows/xxx.yml
+git add .github/workflows/
+git commit -m "sync workflow from main"
+git push origin gh-pages
+```
+
+**最佳实践**:
+- 或者只在 main 分支保留 workflow，gh-pages 分支删除 workflow
+- 或者使用 `workflow_dispatch` 手动触发，而不是分支 push 触发
+
 ---
 
 ### 四、经验教训
