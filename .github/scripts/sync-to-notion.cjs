@@ -1,13 +1,9 @@
 // GitHub → Notion 同步脚本
 // 支持双数据库：完整问卷数据库 + 预约咨询数据库
 
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const NOTION_API_KEY = process.env.NOTION_API_KEY;
 const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
