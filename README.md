@@ -119,6 +119,29 @@ npm install qrcode @types/qrcode
 **原因**: `subSteps.ts` 中配置与实际页面不匹配
 **解决**: 同步更新 `STEP_CONFIG` 与实际页面步骤数
 
+#### 6. sync-to-notion 反复失败的 ES Module 兼容性问题 ⭐
+**问题**: GitHub Actions 中 sync-to-notion 脚本反复出现 `require is not defined` 错误
+**原因**: 
+- `package.json` 设置了 `"type": "module"`，项目使用 ES Module
+- `sync-to-notion.js` 使用了 `require('https')`，这是 CommonJS 语法
+- Node.js 18+ 默认将 `.js` 文件当作 ES Module 处理
+
+**临时解决方案（会复发）**:
+- 将 `require` 改为 `import` 语法
+- 但每次版本更新后又变回 CommonJS
+
+**彻底解决方案**:
+```bash
+# 将文件扩展名从 .js 改为 .cjs
+mv sync-to-notion.js sync-to-notion.cjs
+
+# 更新 workflow 文件
+run: node .github/scripts/sync-to-notion.cjs
+```
+- `.cjs` 扩展名强制 Node.js 使用 CommonJS 模式
+- 不受 `package.json` 中 `"type": "module"` 影响
+- **这是彻底解决，不会再复发**
+
 ---
 
 ### 二、编程注意事项
