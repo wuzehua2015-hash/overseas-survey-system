@@ -1,0 +1,138 @@
+{
+  "project": "企业出海服务评测系统 - Bug修复与优化",
+  "description": "修复用户反馈的问题并优化算法",
+  "version": "3.1",
+  "lastUpdated": "2026-02-27",
+  "principles": {
+    "debugFirst": "每个修改后必须测试，发现问题立即修复",
+    "incremental": "小步快跑，每次只改一个功能",
+    "backup": "修改前备份原文件",
+    "verify": "用browser工具验证UI，用console验证逻辑",
+    "consistency": "修改时检查所有关联文件，确保数据一致性"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "title": "修复行业名称英文显示问题",
+      "description": "报告中建筑行业显示为building，需要全面检查并修复所有行业名称映射",
+      "steps": [
+        "检查所有使用profile.industry的地方",
+        "检查autoSubmit.ts中的行业转换",
+        "检查generateDataSummary中的行业映射",
+        "检查报告页面中的行业显示",
+        "确保所有地方都使用getIndustryLabel或industryMap转换",
+        "运行npm run build检查编译",
+        "测试建筑行业的报告生成"
+      ],
+      "debugCheck": [
+        "建筑行业是否显示中文？",
+        "其他行业是否都显示中文？",
+        "提交到GitHub/Notion的数据是否正确？"
+      ],
+      "passes": false,
+      "priority": "high",
+      "estimatedTime": "1小时"
+    },
+    {
+      "id": 2,
+      "title": "修复评分算法问题",
+      "description": "只填基本信息就显示国际领航者，评分算法需要优化",
+      "steps": [
+        "检查performAssessment函数",
+        "检查calculateFoundationScore",
+        "检查calculateProductScore",
+        "检查calculateOperationScore",
+        "检查calculateResourceScore",
+        "优化评分权重，确保数据完整性影响评分",
+        "添加最低数据要求，未填写足够信息时给出低分",
+        "运行npm run build检查编译",
+        "测试只填基本信息的评分"
+      ],
+      "debugCheck": [
+        "只填基本信息得分是否合理？",
+        "完整填写后得分是否合理？",
+        "企业等级判断是否准确？"
+      ],
+      "passes": false,
+      "priority": "high",
+      "estimatedTime": "1.5小时"
+    },
+    {
+      "id": 3,
+      "title": "优化服务推荐算法",
+      "description": "根据用户行业、阶段、痛点更精准推荐服务",
+      "steps": [
+        "分析当前getRecommendedServices算法",
+        "添加行业维度到服务推荐",
+        "优化痛点匹配算法",
+        "添加服务优先级排序",
+        "确保推荐的服务与用户需求高度相关",
+        "运行npm run build检查编译",
+        "测试不同行业的服务推荐"
+      ],
+      "debugCheck": [
+        "服务推荐是否与行业相关？",
+        "服务推荐是否与阶段匹配？",
+        "推荐的服务是否解决用户痛点？"
+      ],
+      "passes": false,
+      "priority": "medium",
+      "estimatedTime": "1.5小时"
+    },
+    {
+      "id": 4,
+      "title": "全面代码审查和优化建议",
+      "description": "检查整个问卷系统，提出优化建议",
+      "steps": [
+        "检查所有页面组件的一致性",
+        "检查类型定义是否完整",
+        "检查是否有重复代码",
+        "检查错误处理是否完善",
+        "检查性能优化空间",
+        "生成优化建议报告",
+        "运行npm run build检查编译"
+      ],
+      "debugCheck": [
+        "代码是否规范？",
+        "是否有重复代码？",
+        "错误处理是否完善？"
+      ],
+      "passes": false,
+      "priority": "low",
+      "estimatedTime": "2小时"
+    }
+  ],
+  "debugGuidelines": {
+    "beforeStart": [
+      "备份原文件",
+      "确保开发服务器能正常启动",
+      "准备好browser工具"
+    ],
+    "duringDevelopment": [
+      "每改一个小功能就测试",
+      "发现问题立即停下修复",
+      "不要积累多个bug再处理",
+      "善用console.log调试",
+      "修改时检查所有关联文件"
+    ],
+    "afterChange": [
+      "用browser工具验证UI",
+      "检查控制台有无报错",
+      "测试交互功能",
+      "确认移动端正常",
+      "验证数据一致性"
+    ],
+    "commonIssues": {
+      "行业显示英文": "检查所有使用profile.industry的地方，确保使用getIndustryLabel转换",
+      "评分不合理": "检查评分算法权重，确保数据完整性影响评分",
+      "服务推荐不精准": "添加行业维度，优化痛点匹配",
+      "数据不一致": "修改时同步更新所有关联文件"
+    }
+  },
+  "successCriteria": {
+    "functional": "所有bug修复，功能正常",
+    "visual": "所有行业名称显示中文",
+    "algorithm": "评分算法合理，服务推荐精准",
+    "bugFree": "控制台无报错、无异常行为"
+  }
+}
