@@ -18,12 +18,30 @@ import type {
 } from '@/types/questionnaire';
 import { findBenchmarkCompanies } from '@/data/benchmarkCompanies';
 import {
-  industryOptions,
   b2bPlatformOptions,
   socialPlatformOptions,
   b2cPlatformOptions,
   marketOptions,
 } from '@/types/questionnaire';
+
+// 行业中文映射（提前定义供服务推荐使用）
+const industryMap: Record<string, string> = {
+  'machinery': '机械设备',
+  'electronics': '电子电气',
+  'auto': '汽车及零部件',
+  'textile': '纺织服装',
+  'chemical': '化工及新材料',
+  'medical': '医疗器械',
+  'building': '建材五金',
+  'furniture': '家具家居',
+  'food': '食品饮料',
+  'beauty': '美妆个护',
+  'sports': '体育户外',
+  'toys': '玩具礼品',
+  'packaging': '包装印刷',
+  'energy': '新能源',
+  'other': '其他行业'
+};
 
 // 初始数据
 const initialData: QuestionnaireData = {
@@ -793,28 +811,114 @@ function getRecommendedServices(
   stage: AssessmentResult['stage'],
   data: QuestionnaireData
 ): ServiceProduct[] {
-  const services: ServiceProduct[] = [];
+  const { profile, diagnosis, product, operation, resource } = data;
   
-  // 根据阶段推荐
-  const stageServices = serviceProducts.filter(s => s.targetStage.includes(stage));
-  services.push(...stageServices.slice(0, 4));
+  // 计算每个服务的匹配分数
+  const serviceScores: { service: ServiceProduct; score: number; reasons: string[] }[] = [];
   
-  // 根据痛点补充
-  if (data.product.certifications.length === 0) {
-    const certService = serviceProducts.find(s => s.id === 'certification_service');
-    if (certService && !services.includes(certService)) {
-      services.push(certService);
+  for (const service of serviceProducts) {
+    let score = 0;
+    const reasons: string[] = [];
+    
+    // 1. 阶段匹配（最高30分）
+    if (service.targetStage.includes(stage)) {
+      score += 30;
+      reasons.push('符合当前出海阶段');
     }
+    
+    // 2. 行业匹配（最高25分）
+    const industryServiceMap: Record<string, string[]> = {
+      'machinery': ['certification_service', 'market_entry_consulting', 'trade_finance'],
+      'electronics': ['certification_service', 'brand_building', 'digital_transformation'],
+      'auto': ['certification_service', 'overseas_warehouse', 'trade_finance'],
+      'textile': ['brand_building', 'social_media_marketing', 'platform_operation'],
+      'chemical': ['certification_service', 'market_entry_consulting', 'trade_finance'],
+      'medical': ['certification_service', 'market_entry_consulting', 'brand_building'],
+      'building': ['certification_service', 'overseas_warehouse', 'trade_finance'],
+      'furniture': ['brand_building', 'overseas_warehouse', 'platform_operation'],
+      'food': ['certification_service', 'brand_building', 'overseas_warehouse'],
+      'beauty': ['brand_building', 'social_media_marketing', 'platform_operation'],
+      'sports': ['brand_building', 'social_media_marketing', 'platform_operation'],
+      'toys': ['certification_service', 'brand_building', 'platform_operation'],
+      'packaging': ['market_entry_consulting', 'trade_finance', 'platform_operation'],
+      'energy': ['certification_service', 'brand_building', 'trade_finance'],
+    };
+    
+    const recommendedForIndustry = industryServiceMap[profile.industry] || [];
+    if (recommendedForIndustry.includes(service.id)) {
+      score += 25;
+      reasons.push('适合' + (industryMap[profile.industry] || profile.industry) + '行业');
+    }
+    
+    // 3. 痛点匹配（最高25分）
+    let painPointMatches = 0;
+    for (const painPoint of service.painPoints) {
+      // 检查产品痛点
+      if (product.certifications.length === 0 && painPoint.includes('认证')) {
+        painPointMatches++;
+      }
+      if (!product.hasRAndD && painPoint.includes('研发')) {
+        painPointMatches++;
+      }
+      // 检查品牌痛点
+      if (!operation.hasBrand && painPoint.includes('品牌')) {
+        painPointMatches++;
+      }
+      // 检查数字化痛点
+      if (!operation.hasCRM && !operation.hasERP && painPoint.includes('管理')) {
+        painPointMatches++;
+      }
+      // 检查渠道痛点
+      const hasChannels = Object.values(diagnosis.channels).some(v => 
+        Array.isArray(v) ? v.length > 0 : v === true
+      );
+      if (!hasChannels && painPoint.includes('渠道')) {
+        painPointMatches++;
+      }
+      // 检查团队痛点
+      if (!diagnosis.teamConfig.hasDedicatedTeam && painPoint.includes('团队')) {
+        painPointMatches++;
+      }
+      // 检查资金痛点
+      if (resource.financingCapability === 'weak' && painPoint.includes('资金')) {
+        painPointMatches++;
+      }
+    }
+    score += Math.min(painPointMatches * 8, 25);
+    if (painPointMatches > 0) {
+      reasons.push(`匹配${painPointMatches}个痛点`);
+    }
+    
+    // 4. 数据缺失惩罚（如果相关数据未填写，降低优先级）
+    if (service.id === 'certification_service' && product.certifications.length > 0) {
+      score -= 10; // 已有认证，降低优先级
+    }
+    if (service.id === 'brand_building' && operation.hasBrand) {
+      score -= 10; // 已有品牌，降低优先级
+    }
+    
+    // 5. 企业规模匹配（最高10分）
+    const investment = (service.investmentRange.min + service.investmentRange.max) / 2;
+    if (profile.annualRevenue === '>5000' && investment > 20) {
+      score += 10; // 大企业推荐高投入服务
+    } else if (profile.annualRevenue === '1000-3000' && investment >= 10 && investment <= 30) {
+      score += 10; // 中型企业推荐适中投入服务
+    } else if (profile.annualRevenue && profile.annualRevenue !== '>5000' && investment < 15) {
+      score += 10; // 小企业推荐低投入服务
+    }
+    
+    serviceScores.push({ service, score, reasons });
   }
   
-  if (!data.operation.hasBrand) {
-    const brandService = serviceProducts.find(s => s.id === 'brand_building');
-    if (brandService && !services.includes(brandService)) {
-      services.push(brandService);
-    }
-  }
+  // 按分数排序，取前5个
+  serviceScores.sort((a, b) => b.score - a.score);
+  const topServices = serviceScores.slice(0, 5);
   
-  return services.slice(0, 5);
+  // 添加推荐理由到服务描述
+  return topServices.map(({ service, reasons }) => ({
+    ...service,
+    description: service.description + (reasons.length > 0 ? `（推荐理由：${reasons.join('、')}）` : ''),
+  }));
 }
 
 // 生成市场推荐
@@ -1070,9 +1174,6 @@ function generateInvestmentPlan(
 // 生成数据汇总
 function generateDataSummary(data: QuestionnaireData): ReportData['dataSummary'] {
   const { profile, diagnosis, product, operation, resource } = data;
-  
-  // 行业中文映射
-  const industryMap = Object.fromEntries(industryOptions.map(i => [i.value, i.label]));
   
   // 市场中文映射
   const marketMap = Object.fromEntries(marketOptions.map(m => [m.value, m.label]));

@@ -79,9 +79,11 @@
         "服务推荐是否与阶段匹配？",
         "推荐的服务是否解决用户痛点？"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "medium",
-      "estimatedTime": "1.5小时"
+      "estimatedTime": "1.5小时",
+      "completedAt": "2026-02-27",
+      "notes": "已完成，重写推荐算法，添加行业维度、痛点匹配、推荐理由"
     },
     {
       "id": 4,
