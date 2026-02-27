@@ -180,7 +180,7 @@ export function WelcomePage({ onStart, savedProgress, onContinue }: WelcomePageP
         <div className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-1">15+</div>
+              <div className="text-3xl font-bold text-blue-600 mb-1">35+</div>
               <div className="text-sm text-slate-600">标杆企业案例</div>
             </div>
             <div>

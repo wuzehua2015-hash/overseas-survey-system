@@ -10,6 +10,15 @@ import { Phone, Mail, User, Building2, CheckCircle, Loader2, Sparkles, ArrowRigh
 import { submitToGitHub, type SubmissionData } from '@/services/githubStorage';
 import { industryOptions } from '@/types/questionnaire';
 
+// 出海阶段中文映射
+const STAGE_MAP: Record<string, string> = {
+  'preparation': '准备阶段',
+  'exploration': '探索阶段',
+  'growth': '成长阶段',
+  'expansion': '扩张阶段',
+  'mature': '成熟阶段',
+};
+
 interface ConsultationFormProps {
   companyName?: string;
   assessmentScore?: number;
@@ -418,7 +427,7 @@ export function ConsultationForm({
             {assessmentScore > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
                 <Badge variant="secondary" className="bg-blue-100 text-blue-700">评估得分: {assessmentScore}</Badge>
-                {stage && <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">出海阶段: {stage}</Badge>}
+                {stage && <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">出海阶段: {STAGE_MAP[stage] || stage}</Badge>}
                 {level && <Badge variant="secondary" className="bg-purple-100 text-purple-700">企业等级: {level}</Badge>}
               </div>
             )}
