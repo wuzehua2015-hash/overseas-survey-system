@@ -32,9 +32,7 @@ export type OperationSubStep =
 // Resource 页面的子步骤
 export type ResourceSubStep = 
   | 'funding-resource'   // 资金资源
-  | 'policy-support'     // 政策支持
-  | 'expansion-plan'     // 出海规划
-  | 'risk-awareness';    // 风险认知
+  | 'expansion-plan';    // 出海规划
 
 // 所有子步骤的联合类型
 export type SubStep = ProfileSubStep | DiagnosisSubStep | ProductSubStep | OperationSubStep | ResourceSubStep;
@@ -58,8 +56,8 @@ export const STEP_CONFIG: Record<string, { subSteps: string[]; titles: string[] 
     titles: ['数字化能力', '营销能力', '品牌建设'],
   },
   resource: {
-    subSteps: ['funding-resource', 'policy-support', 'expansion-plan', 'risk-awareness'],
-    titles: ['资金资源', '政策支持', '出海规划', '风险认知'],
+    subSteps: ['funding-resource', 'expansion-plan'],
+    titles: ['资金资源', '出海规划'],
   },
 };
 
