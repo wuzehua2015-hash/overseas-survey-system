@@ -21,15 +21,12 @@ export type ProductSubStep =
   | 'product-cert'       // 产品认证
   | 'product-feature'    // 产品特性
   | 'rnd-innovation'     // 研发创新
-  | 'production-capacity' // 生产能力
-  | 'supply-chain';      // 供应链
+  | 'production-capacity'; // 生产能力
 
 // Operation 页面的子步骤
 export type OperationSubStep = 
   | 'digital-capability' // 数字化能力
   | 'marketing-capability' // 营销能力
-  | 'platform-operation' // 平台运营数据
-  | 'social-operation'   // 社媒运营数据
   | 'brand-building';    // 品牌建设
 
 // Resource 页面的子步骤
@@ -53,12 +50,12 @@ export const STEP_CONFIG: Record<string, { subSteps: string[]; titles: string[] 
     titles: ['业务现状', '市场覆盖', '渠道布局', '团队配置'],
   },
   product: {
-    subSteps: ['product-cert', 'product-feature', 'rnd-innovation', 'production-capacity', 'supply-chain'],
-    titles: ['产品认证', '产品特性', '研发创新', '生产能力', '供应链'],
+    subSteps: ['product-cert', 'product-feature', 'rnd-innovation', 'production-capacity'],
+    titles: ['产品认证', '产品特性', '研发创新', '生产能力'],
   },
   operation: {
-    subSteps: ['digital-capability', 'marketing-capability', 'platform-operation', 'social-operation', 'brand-building'],
-    titles: ['数字化能力', '营销能力', '平台运营数据', '社媒运营数据', '品牌建设'],
+    subSteps: ['digital-capability', 'marketing-capability', 'brand-building'],
+    titles: ['数字化能力', '营销能力', '品牌建设'],
   },
   resource: {
     subSteps: ['funding-resource', 'policy-support', 'expansion-plan', 'risk-awareness'],
