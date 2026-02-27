@@ -14,8 +14,8 @@ const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
 const NOTION_CONSULTATION_DATABASE_ID = process.env.NOTION_CONSULTATION_DATABASE_ID;
 const DATA_DIR = process.env.DATA_PATH || '../gh-pages/data/submissions';
 
-// 行业中文映射表
-const industryMap = {
+// 行业中文映射表（与 src/constants/industry.ts 保持一致）
+const INDUSTRY_MAP = {
   'machinery': '机械设备',
   'electronics': '电子电气',
   'auto': '汽车及零部件',
@@ -179,7 +179,7 @@ async function submitToNotion(databaseId, submission) {
     const consultation = submission.consultation || {};
     
     // 构建基础属性
-    const industryLabel = industryMap[contact.industry] || contact.industry || '未填写';
+    const industryLabel = INDUSTRY_MAP[contact.industry] || contact.industry || '未填写';
     const properties = {
       '提交ID': {
         rich_text: [{ text: { content: submission.id || '' } }]

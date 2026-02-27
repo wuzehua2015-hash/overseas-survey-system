@@ -23,25 +23,7 @@ import {
   b2cPlatformOptions,
   marketOptions,
 } from '@/types/questionnaire';
-
-// 行业中文映射（提前定义供服务推荐使用）
-const industryMap: Record<string, string> = {
-  'machinery': '机械设备',
-  'electronics': '电子电气',
-  'auto': '汽车及零部件',
-  'textile': '纺织服装',
-  'chemical': '化工及新材料',
-  'medical': '医疗器械',
-  'building': '建材五金',
-  'furniture': '家具家居',
-  'food': '食品饮料',
-  'beauty': '美妆个护',
-  'sports': '体育户外',
-  'toys': '玩具礼品',
-  'packaging': '包装印刷',
-  'energy': '新能源',
-  'other': '其他行业'
-};
+import { INDUSTRY_MAP, INDUSTRY_SERVICE_MAP } from '@/constants/industry';
 
 // 初始数据
 const initialData: QuestionnaireData = {
@@ -827,27 +809,10 @@ function getRecommendedServices(
     }
     
     // 2. 行业匹配（最高25分）
-    const industryServiceMap: Record<string, string[]> = {
-      'machinery': ['certification_service', 'market_entry_consulting', 'trade_finance'],
-      'electronics': ['certification_service', 'brand_building', 'digital_transformation'],
-      'auto': ['certification_service', 'overseas_warehouse', 'trade_finance'],
-      'textile': ['brand_building', 'social_media_marketing', 'platform_operation'],
-      'chemical': ['certification_service', 'market_entry_consulting', 'trade_finance'],
-      'medical': ['certification_service', 'market_entry_consulting', 'brand_building'],
-      'building': ['certification_service', 'overseas_warehouse', 'trade_finance'],
-      'furniture': ['brand_building', 'overseas_warehouse', 'platform_operation'],
-      'food': ['certification_service', 'brand_building', 'overseas_warehouse'],
-      'beauty': ['brand_building', 'social_media_marketing', 'platform_operation'],
-      'sports': ['brand_building', 'social_media_marketing', 'platform_operation'],
-      'toys': ['certification_service', 'brand_building', 'platform_operation'],
-      'packaging': ['market_entry_consulting', 'trade_finance', 'platform_operation'],
-      'energy': ['certification_service', 'brand_building', 'trade_finance'],
-    };
-    
-    const recommendedForIndustry = industryServiceMap[profile.industry] || [];
+    const recommendedForIndustry = INDUSTRY_SERVICE_MAP[profile.industry] || [];
     if (recommendedForIndustry.includes(service.id)) {
       score += 25;
-      reasons.push('适合' + (industryMap[profile.industry] || profile.industry) + '行业');
+      reasons.push('适合' + (INDUSTRY_MAP[profile.industry] || profile.industry) + '行业');
     }
     
     // 3. 痛点匹配（最高25分）
@@ -1201,7 +1166,7 @@ function generateDataSummary(data: QuestionnaireData): ReportData['dataSummary']
         profile.companyType === 'hybrid' ? '工贸一体' :
         profile.companyType === 'brand' ? '品牌型' :
         profile.companyType === 'service' ? '服务型' : '-',
-      '所属行业': industryMap[profile.industry] || profile.industry,
+      '所属行业': INDUSTRY_MAP[profile.industry] || profile.industry,
       '主要产品': profile.mainProduct,
       '年营业额': profile.annualRevenue === '>5000' ? '5000万以上' :
         profile.annualRevenue === '3000-5000' ? '3000-5000万' :
