@@ -65,7 +65,7 @@ export function ProductPage({ data, onUpdate, onNext, onBack, onSaveProgress }: 
     updateField('qualityControl', updated);
   };
 
-  const stepTitles = ['产品认证', '产品特性', '研发创新', '生产能力'];
+  const stepTitles = ['产品认证', '产品特性', '研发创新', '生产能力', '供应链'];
 
   // 渲染产品认证
   const renderProductCert = () => (
@@ -172,6 +172,40 @@ export function ProductPage({ data, onUpdate, onNext, onBack, onSaveProgress }: 
           />
           <Label className="cursor-pointer">设有专门的研发团队</Label>
         </div>
+
+        {localData.hasRAndD && (
+          <div className="pl-8 grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>年均新品数量</Label>
+              <Select value={localData.annualNewProducts} onValueChange={(v) => updateField('annualNewProducts', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="请选择" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">无</SelectItem>
+                  <SelectItem value="1-5">1-5款</SelectItem>
+                  <SelectItem value="5-10">5-10款</SelectItem>
+                  <SelectItem value=">10">10款以上</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>专利数量</Label>
+              <Select value={localData.patentCount} onValueChange={(v) => updateField('patentCount', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="请选择" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">无</SelectItem>
+                  <SelectItem value="1-5">1-5项</SelectItem>
+                  <SelectItem value="5-10">5-10项</SelectItem>
+                  <SelectItem value=">10">10项以上</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -243,6 +277,47 @@ export function ProductPage({ data, onUpdate, onNext, onBack, onSaveProgress }: 
     </div>
   );
 
+  // 渲染供应链
+  const renderSupplyChain = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Package className="w-5 h-5 text-blue-600" />
+        <h3 className="text-lg font-semibold text-slate-900">供应链</h3>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>供应链稳定性</Label>
+          <Select value={localData.supplyChainStability} onValueChange={(v) => updateField('supplyChainStability', v as any)}>
+            <SelectTrigger>
+              <SelectValue placeholder="请选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="excellent">优秀（多供应商，无断供风险）</SelectItem>
+              <SelectItem value="good">良好（主要材料稳定）</SelectItem>
+              <SelectItem value="average">一般（偶有不稳定）</SelectItem>
+              <SelectItem value="poor">较差（经常断供）</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>关键原材料来源</Label>
+          <Select value={localData.keyMaterialSource} onValueChange={(v) => updateField('keyMaterialSource', v as any)}>
+            <SelectTrigger>
+              <SelectValue placeholder="请选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="domestic">国内采购</SelectItem>
+              <SelectItem value="imported">进口为主</SelectItem>
+              <SelectItem value="mixed">混合采购</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
   // 根据当前子步骤渲染内容
   const renderSubStepContent = () => {
     switch (currentSubStep) {
@@ -254,6 +329,8 @@ export function ProductPage({ data, onUpdate, onNext, onBack, onSaveProgress }: 
         return renderRnDInnovation();
       case 3:
         return renderProductionCapacity();
+      case 4:
+        return renderSupplyChain();
       default:
         return renderProductCert();
     }

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Share2, Award, Database } from 'lucide-react';
+import { Monitor, Share2, Award, Database } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -48,6 +49,20 @@ export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }
     setLocalData(prev => ({ ...prev, [field]: value }));
   };
 
+  const updatePlatformOp = (key: keyof OperationCapability['platformOperation'], value: string) => {
+    setLocalData(prev => ({
+      ...prev,
+      platformOperation: { ...prev.platformOperation, [key]: value }
+    }));
+  };
+
+  const updateSocialOp = (key: keyof OperationCapability['socialOperation'], value: string) => {
+    setLocalData(prev => ({
+      ...prev,
+      socialOperation: { ...prev.socialOperation, [key]: value }
+    }));
+  };
+
   const toggleBrandProtection = (value: string) => {
     const current = localData.brandProtection;
     const updated = current.includes(value)
@@ -56,7 +71,7 @@ export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }
     updateField('brandProtection', updated);
   };
 
-  const stepTitles = ['数字化能力', '营销能力', '品牌建设'];
+  const stepTitles = ['数字化能力', '营销能力', '平台运营数据', '社媒运营数据', '品牌建设'];
 
   // 渲染数字化能力
   const renderDigitalCapability = () => (
@@ -147,6 +162,129 @@ export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }
     </div>
   );
 
+  // 渲染平台运营数据
+  const renderPlatformOperation = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Monitor className="w-5 h-5 text-blue-600" />
+        <h3 className="text-lg font-semibold text-slate-900">平台运营数据（如使用B2B平台）</h3>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>平台产品数量</Label>
+          <Input
+            value={localData.platformOperation.productCount}
+            onChange={(e) => updatePlatformOp('productCount', e.target.value)}
+            placeholder="请输入"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>月均询盘量</Label>
+          <Input
+            value={localData.platformOperation.inquiryVolume}
+            onChange={(e) => updatePlatformOp('inquiryVolume', e.target.value)}
+            placeholder="请输入"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>平均询盘响应时间</Label>
+          <Select 
+            value={localData.platformOperation.responseTime} 
+            onValueChange={(v) => updatePlatformOp('responseTime', v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="请选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="<2h">2小时以内</SelectItem>
+              <SelectItem value="2-8h">2-8小时</SelectItem>
+              <SelectItem value="8-24h">8-24小时</SelectItem>
+              <SelectItem value=">24h">24小时以上</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>询盘转化率</Label>
+          <Select 
+            value={localData.platformOperation.conversionRate} 
+            onValueChange={(v) => updatePlatformOp('conversionRate', v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="请选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="<5%">5%以下</SelectItem>
+              <SelectItem value="5-10%">5-10%</SelectItem>
+              <SelectItem value="10-20%">10-20%</SelectItem>
+              <SelectItem value=">20%">20%以上</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
+  // 渲染社媒运营数据
+  const renderSocialOperation = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Share2 className="w-5 h-5 text-blue-600" />
+        <h3 className="text-lg font-semibold text-slate-900">社媒运营数据（如使用社交媒体）</h3>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>社媒账号粉丝总数</Label>
+          <Input
+            value={localData.socialOperation.totalFollowers}
+            onChange={(e) => updateSocialOp('totalFollowers', e.target.value)}
+            placeholder="请输入"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>月均发布内容数</Label>
+          <Input
+            value={localData.socialOperation.monthlyContent}
+            onChange={(e) => updateSocialOp('monthlyContent', e.target.value)}
+            placeholder="请输入"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>平均互动率</Label>
+          <Select 
+            value={localData.socialOperation.engagementRate} 
+            onValueChange={(v) => updateSocialOp('engagementRate', v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="请选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="<1%">1%以下</SelectItem>
+              <SelectItem value="1-3%">1-3%</SelectItem>
+              <SelectItem value="3-5%">3-5%</SelectItem>
+              <SelectItem value=">5%">5%以上</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>月均获客数量</Label>
+          <Input
+            value={localData.socialOperation.leadsGenerated}
+            onChange={(e) => updateSocialOp('leadsGenerated', e.target.value)}
+            placeholder="请输入"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   // 渲染品牌建设
   const renderBrandBuilding = () => (
     <div className="space-y-6">
@@ -215,6 +353,10 @@ export function OperationPage({ data, onUpdate, onNext, onBack, onSaveProgress }
       case 1:
         return renderMarketingCapability();
       case 2:
+        return renderPlatformOperation();
+      case 3:
+        return renderSocialOperation();
+      case 4:
         return renderBrandBuilding();
       default:
         return renderDigitalCapability();
